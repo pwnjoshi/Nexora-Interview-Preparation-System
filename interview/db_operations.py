@@ -190,20 +190,22 @@ def update_session_results(session_id, score, evaluation_data, profile_updates):
 
         # Update session fields
         session.score = score
-        session.flag_records = evaluation_data.get("flag_records", {})
-        session.recommended_next_level = evaluation_data.get("recommended_level")
-        session.evaluation_flag = evaluation_data.get("flag")
+        # Align with evaluate_interview_answers output keys
+        session.flag_records = evaluation_data.get("flag_record", {}) if evaluation_data else {}
+        session.recommended_next_level = evaluation_data.get("recommended_next_level") if evaluation_data else session.recommended_next_level
+        session.evaluation_flag = evaluation_data.get("overall_flag") if evaluation_data else session.evaluation_flag
         session.save()
 
         logger.info(f"Updated interview session '{session_id}' with new score: {score}")
 
         # Update user's profile if needed
-        if profile_updates and "username" in profile_updates:
-            user = User.objects.filter(username=profile_updates["username"]).first()
+        if profile_updates and ("username" in profile_updates or "user" in profile_updates):
+            username = profile_updates.get("username") or getattr(profile_updates.get("user"), "username", None)
+            user = User.objects.filter(username=username).first() if username else None
             if user:
                 profile = Profile.objects.filter(user=user).first()
                 if profile:
-                    new_level = profile_updates.get("current_level")
+                    new_level = profile_updates.get("current_level") or profile_updates.get("recommended_next_level")
                     if new_level:
                         profile.current_level = new_level
                         profile.save()

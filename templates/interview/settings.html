@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - Nexora{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- Profile Settings -->
+        <div class="card mb-4">
+            <form method="post" autocomplete="off">
+                {% csrf_token %}
+                
+                <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 24px;">
+                    <i class="bi bi-person-circle" style="color: var(--primary-color);"></i> Profile Settings
+                </h4>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-weight: 600; font-size: 14px;">Full Name</label>
+                        <input type="text" name="full_name" class="form-control" value="{{ profile.name|default:request.user.username }}" style="padding: 12px; border-radius: 8px;">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-weight: 600; font-size: 14px;">Email Address</label>
+                        <input type="email" name="email" class="form-control" value="{{ profile.email|default:request.user.email }}" style="padding: 12px; border-radius: 8px;">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-weight: 600; font-size: 14px;">Phone Number</label>
+                        <input type="tel" name="phone" class="form-control" placeholder="+1 (555) 000-0000" value="{{ profile.phone }}" style="padding: 12px; border-radius: 8px;">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-weight: 600; font-size: 14px;">Current Level</label>
+                        <select name="current_level" class="form-select" style="padding: 12px; border-radius: 8px;">
+                            <option value="beginner" {% if profile.current_level == 'beginner' %}selected{% endif %}>Beginner</option>
+                            <option value="intermediate" {% if profile.current_level == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                            <option value="advanced" {% if profile.current_level == 'advanced' %}selected{% endif %}>Advanced</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" style="font-weight: 600; font-size: 14px;">LinkedIn Profile</label>
+                        <input type="url" name="linkedin_url" class="form-control" placeholder="https://linkedin.com/in/yourprofile" value="{{ profile.linkedin_url }}" style="padding: 12px; border-radius: 8px;">
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn-primary-custom" style="padding: 14px 48px; font-size: 16px; font-weight: 600;">
+                        <i class="bi bi-check-circle"></i>
+                        Save Changes
+                    </button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

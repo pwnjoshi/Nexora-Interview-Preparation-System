@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - Nexora{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Filter & Actions Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-3" style="gap:16px; flex-wrap:wrap;">
+            <form method="get" class="d-flex align-items-center" style="gap:8px;">
+                <label for="range" style="font-size:13px; color: var(--text-muted); font-weight:600;">Range:</label>
+                <select name="range" id="range" onchange="this.form.submit()" class="form-select" style="width:auto; padding:6px 32px 6px 8px; font-size:13px;">
+                    <option value="all" {% if range_param == 'all' %}selected{% endif %}>All</option>
+                    <option value="30" {% if range_param == '30' %}selected{% endif %}>Last 30 days</option>
+                    <option value="7" {% if range_param == '7' %}selected{% endif %}>Last 7 days</option>
+                </select>
+            </form>
+            <a href="{% url 'reports_pdf' %}?range={{ range_param }}" class="btn-primary-custom" style="padding:10px 16px;">
+                <i class="bi bi-download"></i>
+                Export PDF
+            </a>
+        </div>
+        <!-- Stats Overview -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card" style="padding: 20px;">
+                    <div style="display: flex; justify-content: between align-items: center;">
+                        <div>
+                            <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 8px 0;">Total Interviews</p>
+                            <h3 style="font-size: 32px; font-weight: 700; margin: 0;">{{ stats.total_interviews|default:0 }}</h3>
+                        </div>
+                        <div style="width: 48px; height: 48px; background: rgba(99, 102, 241, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-clipboard-check" style="font-size: 24px; color: var(--primary-color);"></i>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 13px; color: var(--success);">
+                        <i class="bi bi-arrow-up"></i> {% if stats.monthly_change > 0 %}+{{ stats.monthly_change|floatformat:0 }}% from last month{% else %}No change{% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card" style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 8px 0;">Avg Score</p>
+                            <h3 style="font-size: 32px; font-weight: 700; margin: 0;">{{ stats.avg_score|default:0|floatformat:0 }}%</h3>
+                        </div>
+                        <div style="width: 48px; height: 48px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-graph-up-arrow" style="font-size: 24px; color: var(--success);"></i>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 13px; color: var(--success);">
+                        <i class="bi bi-{% if stats.avg_score >= 70 %}arrow-up{% else %}dash{% endif %}"></i> {% if stats.avg_score >= 70 %}Good performance{% else %}Keep practicing{% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card" style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 8px 0;">Pass Rate</p>
+                            <h3 style="font-size: 32px; font-weight: 700; margin: 0;">{{ stats.pass_rate|default:0|floatformat:0 }}%</h3>
+                        </div>
+                        <div style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-trophy" style="font-size: 24px; color: var(--warning);"></i>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 13px; color: var(--text-muted);">
+                        <i class="bi bi-{% if stats.pass_rate >= 75 %}check-circle{% else %}dash{% endif %}"></i> {% if stats.pass_rate >= 75 %}Excellent{% else %}Room for improvement{% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card" style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 8px 0;">Time Practiced</p>
+                            <h3 style="font-size: 32px; font-weight: 700; margin: 0;">{{ stats.total_hours|default:0|floatformat:1 }}h</h3>
+                        </div>
+                        <div style="width: 48px; height: 48px; background: rgba(139, 92, 246, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-clock" style="font-size: 24px; color: #8b5cf6;"></i>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 13px; color: var(--success);">
+                        <i class="bi bi-clock"></i> Keep up the practice!
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Performance Breakdown -->
+        <div class="card mb-4">
+            <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Performance Breakdown</h4>
+            <div style="height: 320px;">
+                <canvas id="reportsTrend" height="300"></canvas>
+            </div>
+        </div>
+        
+        <!-- Strengths and Areas to Improve -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
+                        <i class="bi bi-star-fill" style="color: var(--warning);"></i> Strengths
+                    </h4>
+                    <div class="d-flex flex-column gap-3">
+                        {% if stats.strengths and stats.strengths|length > 0 %}
+                            {% for s in stats.strengths %}
+                            <div style="padding: 16px; background: rgba(16, 185, 129, 0.05); border-left: 3px solid var(--success); border-radius: 8px;">
+                                <p style="font-weight: 600; margin: 0 0 4px 0;">{{ s.label|title }}</p>
+                                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">High accuracy in recent answers</p>
+                                <div style="margin-top: 8px;">
+                                    <span style="font-size: 12px; padding: 4px 8px; background: var(--success); color: white; border-radius: 4px;">{{ s.accuracy }}% accuracy</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="color: var(--text-muted);">No strengths identified yet. Complete more interviews.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
+                        <i class="bi bi-exclamation-triangle-fill" style="color: var(--warning);"></i> Areas to Improve
+                    </h4>
+                    <div class="d-flex flex-column gap-3">
+                        {% if stats.weaknesses and stats.weaknesses|length > 0 %}
+                            {% for w in stats.weaknesses %}
+                            <div style="padding: 16px; background: rgba(245, 158, 11, 0.05); border-left: 3px solid var(--warning); border-radius: 8px;">
+                                <p style="font-weight: 600; margin: 0 0 4px 0;">{{ w.label|title }}</p>
+                                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Needs more practice in recent answers</p>
+                                <div style="margin-top: 8px;">
+                                    <span style="font-size: 12px; padding: 4px 8px; background: var(--warning); color: white; border-radius: 4px;">{{ w.accuracy }}% accuracy</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="color: var(--text-muted);">No clear weak areas yet. Great job!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Download Report Button -->
+        <div class="text-center" style="font-size:12px; color: var(--text-muted); margin-top:8px;">
+            Showing range: <strong>{{ range_param|title }}</strong>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    (function(){
+        try {
+            const payload = {{ chart_json|default:'{}'|safe }};
+            if (payload.labels && document.getElementById('reportsTrend')){
+                const ctx = document.getElementById('reportsTrend').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: payload.labels,
+                        datasets: [{
+                            label: 'Score %',
+                            data: payload.scores || [],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99,102,241,0.15)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, max: 100 } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        } catch(e){ console.warn('Reports chart skipped:', e); }
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Nexora{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card text-center">
+            <div style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary-color), #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: white; font-size: 48px; font-weight: 700;">
+                {{ request.user.username|first|upper }}
+            </div>
+            <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">{{ request.user.username|title }}</h3>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">{{ request.user.email }}</p>
+            
+            <div style="display: inline-flex; padding: 8px 16px; background: var(--primary-light); border-radius: 20px; font-size: 14px; font-weight: 600; color: var(--primary-color); margin-bottom: 24px;">
+                <i class="bi bi-star-fill me-2"></i>
+                {{ stats.current_level|title }} Level
+            </div>
+            
+            <a href="{% url 'settings' %}" class="btn-primary-custom" style="justify-content: center;">
+                <i class="bi bi-pencil"></i>
+                Edit Profile
+            </a>
+        </div>
+        
+        <div class="card">
+            <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Quick Stats</h4>
+            <div class="d-flex flex-column gap-3">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Member Since</span>
+                    <span style="font-weight: 600;">{{ request.user.date_joined|date:"M Y" }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Interviews Completed</span>
+                    <span style="font-weight: 600;">{{ stats.total_interviews|default:0 }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Average Score</span>
+                    <span style="font-weight: 600; color: var(--success);">{{ stats.avg_score|default:0|floatformat:0 }}%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Practice Time</span>
+                    <span style="font-weight: 600;">{{ stats.total_hours|default:0|floatformat:1 }} hours</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card">
+            <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 24px;">Skills Overview</h4>
+                        {% if stats.skills %}
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                {% for skill in stats.skills %}
+                <span class="skill-badge">{{ skill }}</span>
+                {% endfor %}
+                        {% else %}
+                        <p style="color: var(--text-muted);">No skills found. Please upload your resume.</p>
+                        {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 24px;">Recent Activity</h4>
+            {% if stats.recent_activity %}
+            <div class="recent-activity-grid">
+                {% for activity in stats.recent_activity %}
+                <div class="activity-card level-{% if activity.score >= 0.9 %}high{% elif activity.score >= 0.7 %}medium{% else %}low{% endif %}">
+                    <div class="activity-icon-wrapper">
+                        <div class="activity-icon level-{% if activity.score >= 0.9 %}high{% elif activity.score >= 0.7 %}medium{% else %}low{% endif %}">
+                            <i class="bi bi-{{ activity.icon }}"></i>
+                        </div>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-header">
+                            <p class="activity-title">{{ activity.type }} - {{ activity.skills }}</p>
+                            <span class="activity-time">{{ activity.time_ago }}</span>
+                        </div>
+                        <p class="activity-detail">{{ activity.detail }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if stats.total_pages > 1 %}
+            <div class="activity-pagination">
+                {% if stats.has_prev %}
+                <a href="?page={{ stats.page|add:-1 }}" class="page-btn">Prev</a>
+                {% endif %}
+                <span class="page-info">Page {{ stats.page }} of {{ stats.total_pages }}</span>
+                {% if stats.has_next %}
+                <a href="?page={{ stats.page|add:1 }}" class="page-btn">Next</a>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% else %}
+            <p style="color: var(--text-muted);">No recent activity. Start your first interview!</p>
+            {% endif %}
+        </div>
+        
+        <div class="card">
+            <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 24px;">Achievements</h4>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div style="text-align: center; padding: 20px; background: var(--bg-light); border-radius: 12px;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                            <i class="bi bi-trophy-fill" style="font-size: 28px; color: white;"></i>
+                        </div>
+                        <p style="font-weight: 600; margin: 0 0 4px 0;">First Interview</p>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Completed your first mock interview</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div style="text-align: center; padding: 20px; background: var(--bg-light); border-radius: 12px;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                            <i class="bi bi-lightning-fill" style="font-size: 28px; color: white;"></i>
+                        </div>
+                        <p style="font-weight: 600; margin: 0 0 4px 0;">10 Streak</p>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 0;">10 interviews in a row</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div style="text-align: center; padding: 20px; background: var(--bg-light); border-radius: 12px;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                            <i class="bi bi-star-fill" style="font-size: 28px; color: white;"></i>
+                        </div>
+                        <p style="font-weight: 600; margin: 0 0 4px 0;">Perfect Score</p>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Scored 100% on an interview</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

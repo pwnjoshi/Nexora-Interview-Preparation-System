@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Nexora{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Welcome Section -->
+        <div class="card" style="background: linear-gradient(135deg, #ede9fe, #ddd6fe); border: none;">
+            <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">
+                Welcome back, {{ request.user.username|title }} 👋
+            </h2>
+            <p style="color: var(--text-muted); margin: 0;">Let's get ready to master your next interview.</p>
+            <a href="{% url 'start_interview' %}" class="btn-primary-custom mt-3" style="width: fit-content;">
+                <i class="bi bi-rocket-takeoff"></i>
+                Start New Mock Interview
+            </a>
+        </div>
+        
+        <!-- Resume Snapshot -->
+        <div class="card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 style="font-size: 18px; font-weight: 600; margin: 0;">Resume Snapshot</h4>
+                <a href="{% url 'upload_resume' %}" style="font-size: 14px; color: var(--primary-color); text-decoration: none;">
+                    <i class="bi bi-pencil"></i> Edit Resume
+                </a>
+            </div>
+            
+            {% if resume %}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: var(--bg-light); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-code-slash" style="font-size: 20px; color: var(--primary-color);"></i>
+                        </div>
+                        <div>
+                            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Skills</p>
+                            <p style="font-size: 16px; font-weight: 600; margin: 0;">
+                                {% if resume.skills %}{{ resume.skills|length }}{% else %}0{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: var(--bg-light); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-briefcase" style="font-size: 20px; color: var(--primary-color);"></i>
+                        </div>
+                        <div>
+                            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Experience</p>
+                            <p style="font-size: 16px; font-weight: 600; margin: 0;">{{ stats.experience_years|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: var(--bg-light); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-mortarboard" style="font-size: 20px; color: var(--primary-color);"></i>
+                        </div>
+                        <div>
+                            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Education</p>
+                            <p style="font-size: 16px; font-weight: 600; margin: 0;">{{ stats.education_level|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-file-earmark-x" style="font-size: 48px; color: var(--text-muted);"></i>
+                <p style="color: var(--text-muted); margin-top: 12px;">No resume uploaded yet</p>
+                <a href="{% url 'upload_resume' %}" class="btn-primary-custom mt-2">
+                    <i class="bi bi-upload"></i>
+                    Upload Resume
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Completed Interviews</div>
+                    <div class="stat-value">{{ stats.total_interviews|default:0 }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Average Feedback Score</div>
+                    <div class="stat-value">{{ stats.avg_feedback_score|default:0|floatformat:1 }}<span style="font-size: 18px; color: var(--text-muted);">/5</span></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Confidence Level</div>
+                    <div class="stat-value">{{ stats.confidence_level|default:0|floatformat:0 }}%</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Technical Accuracy</div>
+                    <div class="stat-value">{{ stats.technical_accuracy|default:0|floatformat:0 }}%</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Improvement Over Time -->
+        <div class="card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 style="font-size: 18px; font-weight: 600; margin: 0;">Improvement Over Time</h4>
+                <span style="font-size: 13px; color: var(--text-muted);">Last 8 sessions</span>
+            </div>
+            <div style="height: 220px;">
+                <canvas id="scoreTrend" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Skill Radar -->
+        <div class="card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 style="font-size: 18px; font-weight: 600; margin: 0;">Skill Radar</h4>
+                <span style="font-size: 13px; color: var(--text-muted);">Key categories</span>
+            </div>
+            <div style="height: 320px;">
+                <canvas id="skillRadar" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Recent Feedback Insights -->
+        <div class="card">
+            <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Your Recent Feedback Insights</h4>
+            {% if insights and insights|length > 0 %}
+                {% for ins in insights %}
+                <div style="padding: 16px; background: var(--bg-light); border-radius: 8px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: start; gap: 12px;">
+                        <i class="bi bi-{{ ins.icon }}" style="font-size: 24px; color: {% if ins.tone == 'warning' %}var(--warning){% else %}var(--success){% endif %};"></i>
+                        <div>
+                            <p style="font-size: 14px; color: var(--primary-color); font-weight: 600; margin: 0;">
+                                {{ ins.text }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="padding: 16px; background: var(--bg-light); border-radius: 8px;">
+                    <div style="display: flex; align-items: start; gap: 12px;">
+                        <i class="bi bi-lightbulb" style="font-size: 24px; color: var(--primary-color);"></i>
+                        <div>
+                            <p style="font-size: 14px; color: var(--primary-color); font-weight: 600; margin: 0;">
+                                Practice and complete your first interview to get personalized insights.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 16px;">
+                <h4 style="font-size: 18px; font-weight: 600; margin: 0;">Quick Actions</h4>
+                <span style="font-size: 12px; padding: 4px 8px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 999px; color: var(--text-muted);">{{ stats.questions_per_interview|default:9 }} Qs/interview</span>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <a href="{% url 'upload_resume' %}" class="btn btn-outline-primary" style="border-radius: 8px; padding: 12px; text-align: left; display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-upload" style="font-size: 20px;"></i>
+                    <span style="font-weight: 500;">Upload Resume</span>
+                </a>
+                
+                <a href="{% url 'start_interview' %}" class="btn btn-outline-primary" style="border-radius: 8px; padding: 12px; text-align: left; display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-lightning" style="font-size: 20px;"></i>
+                    <span style="font-weight: 500;">Start New Interview</span>
+                </a>
+                
+                <a href="{% url 'reports' %}" class="btn btn-outline-primary" style="border-radius: 8px; padding: 12px; text-align: left; display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-file-text" style="font-size: 20px;"></i>
+                    <span style="font-weight: 500;">View Past Reports</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Preparedness Widget -->
+        <div class="card" style="background: linear-gradient(135deg, var(--primary-color), #8b5cf6); color: white; border: none;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                {% with prep=stats.avg_score|default:0 %}
+                <div class="progress-circle" style="--progress: {{ prep }}%; background: conic-gradient(white 0% {{ prep }}%, rgba(255,255,255,0.2) {{ prep }}% 100%);">
+                    <div class="progress-text" style="color: var(--primary-color);">{{ prep|floatformat:0 }}%</div>
+                </div>
+                <div>
+                    <h4 style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">Preparedness</h4>
+                    {% if prep >= 85 %}
+                        <p style="font-size: 13px; margin: 0; opacity: 0.9;">Excellent momentum — keep it up!</p>
+                    {% elif prep >= 60 %}
+                        <p style="font-size: 13px; margin: 0; opacity: 0.9;">Strong progress — aim for mastery.</p>
+                    {% else %}
+                        <p style="font-size: 13px; margin: 0; opacity: 0.9;">Keep practicing to reach 100%.</p>
+                    {% endif %}
+                </div>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    (function(){
+        try {
+            const payload = {{ chart_json|default:'{}'|safe }};
+            // Line chart: Improvement Over Time
+            if (payload.labels && payload.labels.length && document.getElementById('scoreTrend')) {
+                const ctx = document.getElementById('scoreTrend').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: payload.labels,
+                        datasets: [{
+                            label: 'Score %',
+                            data: payload.scores || [],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 100, ticks: { stepSize: 20 } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Radar chart: Skill categories
+            if (payload.radar_labels && payload.radar_labels.length && document.getElementById('skillRadar')) {
+                const rctx = document.getElementById('skillRadar').getContext('2d');
+                new Chart(rctx, {
+                    type: 'radar',
+                    data: {
+                        labels: payload.radar_labels,
+                        datasets: [{
+                            label: 'Skills Coverage',
+                            data: payload.radar_values || [],
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                            pointBackgroundColor: '#8b5cf6',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { r: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('Chart rendering skipped:', e);
+        }
+    })();
+</script>
+{% endblock %}

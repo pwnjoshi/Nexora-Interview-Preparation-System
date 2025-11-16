@@ -1,160 +1,175 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interview Results - Nexora</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; }
-    .report-card { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
-    .score-circle { 
-        font-size: 2.5em; 
-        font-weight: bold; 
-        color: white; 
-        background-color: #007bff; 
-        width: 120px; 
-        height: 120px; 
-        border-radius: 50%; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        margin: 0 auto;
-    }
-    .question-block { border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px; }
-    .feedback { background-color: #f8f9fa; border: 1px solid #e9ecef; padding: 10px; border-radius: 5px; }
-    .grade-badge { font-size: 3em; font-weight: bold; }
-</style>
-</head>
-<body>
-<div class="container mt-5">
-    <!-- Messages -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+{% extends 'base.html' %}
 
-<h2><i class="bi bi-trophy-fill text-warning"></i> Your Interview Report</h2>
+{% block title %}Interview Results{% endblock %}
+{% block page_title %}Interview Results{% endblock %}
 
-<div class="report-card">
-    <h3><i class="bi bi-graph-up"></i> Overall Performance</h3>
-    
-    {% if score_details %}
-        <div class="row text-center my-4">
-            <div class="col-md-3">
-                <div class="grade-badge text-primary">{{ score_details.grade }}</div>
-                <p class="text-muted">Grade</p>
-            </div>
-            <div class="col-md-3">
-                <div class="score-circle" style="background-color: 
-                    {% if score_details.percentage >= 80 %}#28a745{% elif score_details.percentage >= 60 %}#ffc107{% else %}#dc3545{% endif %};">
-                    {{ score_details.percentage }}%
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Overall -->
+        <div class="card mb-4" style="padding:20px;">
+            <div style="display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <h3 style="margin:0;">Overall Performance</h3>
+                    <div style="color:var(--text-muted); font-size:13px;">{{ score_details.total_questions }} questions • Level: {{ session.current_level|default:"Beginner"|title }}</div>
                 </div>
-                <p class="text-muted mt-2">Score</p>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="font-size:28px; font-weight:700;">{{ score_details.percentage }}%</div>
+                    <span style="display:inline-block; padding:6px 12px; border:1px solid var(--border-color); border-radius:8px; font-weight:600;">Grade {{ score_details.grade }}</span>
+                </div>
             </div>
-            <div class="col-md-3">
-                <h2 class="text-primary">{{ score_details.total_questions }}</h2>
-                <p class="text-muted">Questions</p>
+
+            {% if session.recommended_next_level and session.recommended_next_level != session.current_level %}
+            <div class="alert alert-success mt-3">
+                Ready to advance: {{ session.current_level|title }} → {{ session.recommended_next_level|title }}
             </div>
-            <div class="col-md-3">
-                <h2 class="text-info">{{ session.current_level|default:"Beginner"|title }}</h2>
-                <p class="text-muted">Difficulty Level</p>
+            {% elif session.evaluation_flag == 'Easier' %}
+            <div class="alert alert-warning mt-3">Consider revisiting fundamentals before moving up.</div>
+            {% else %}
+            <div class="alert alert-info mt-3">Keep practicing to strengthen consistency.</div>
+            {% endif %}
+
+            <div class="alert alert-secondary mt-2" style="margin-bottom:0;">
+                {{ score_details.feedback }}
             </div>
         </div>
-        
-        <!-- Level Progression -->
-        {% if session.recommended_next_level and session.recommended_next_level != session.current_level %}
-        <div class="alert alert-success">
-            <h5><i class="bi bi-star-fill"></i> Congratulations! You're ready for the next level!</h5>
-            <p class="mb-0">
-                <strong>Current Level:</strong> {{ session.current_level|title }} → 
-                <strong>Recommended Next Level:</strong> {{ session.recommended_next_level|title }}
-            </p>
-            <p class="mb-0 mt-2">
-                <i class="bi bi-info-circle"></i> Your next interview will automatically use {{ session.recommended_next_level|title }} difficulty questions.
-            </p>
-        </div>
-        {% elif session.evaluation_flag == 'Easier' %}
-        <div class="alert alert-warning">
-            <h5><i class="bi bi-arrow-down-circle"></i> Room for Improvement</h5>
-            <p class="mb-0">Consider reviewing the basics before attempting more difficult questions.</p>
-        </div>
-        {% else %}
-        <div class="alert alert-info">
-            <h5><i class="bi bi-check-circle"></i> Keep Practicing!</h5>
-            <p class="mb-0">Take more interviews at this level to master the concepts and progress further.</p>
-        </div>
-        {% endif %}
-        
-        <div class="alert alert-info">
-            <strong><i class="bi bi-lightbulb"></i> Feedback:</strong> {{ score_details.feedback }}
-        </div>
-    {% else %}
-        <div class="score-circle">
-            {{ session.final_score|floatformat:1 }}
-        </div>
-        <p style="text-align: center; margin-top: 15px;">
-            Average Score
-        </p>
-    {% endif %}
-</div>
 
-<div class="report-card">
-    <h3><i class="bi bi-list-check"></i> Skills Tested</h3>
-    <div>
-        {% for skill in skills %}
-            <span class="badge bg-primary me-2 mb-2">{{ skill }}</span>
-        {% endfor %}
-    </div>
-</div>
+        <!-- Analytics -->
+        <div class="card mb-4" style="padding:20px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <h3 style="margin:0;">Analytics</h3>
+                {% if score_details.total_questions %}
+                    <span class="text-muted" style="font-size:12px;">Based on {{ score_details.total_questions }} answers</span>
+                {% endif %}
+            </div>
 
-<div class="report-card">
-    <h3><i class="bi bi-card-checklist"></i> Answer Details</h3>
+            <!-- Stat cards -->
+            <div class="row mt-3 g-3">
+                <div class="col-12 col-md-4">
+                    <div class="d-flex align-items-center" style="gap:12px; padding:14px; border:1px solid var(--border-color); border-radius:12px;">
+                        <div style="width:40px; height:40px; border-radius:10px; background: linear-gradient(135deg, var(--primary-color), #8b5cf6); color:#fff; display:flex; align-items:center; justify-content:center;">
+                            <i class="bi bi-speedometer2"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted" style="font-size:12px;">Average per question</div>
+                            <div style="font-size:20px; font-weight:700;">{{ analytics.avg_pct }}%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="d-flex align-items-center" style="gap:12px; padding:14px; border:1px solid var(--border-color); border-radius:12px;">
+                        <div style="width:40px; height:40px; border-radius:10px; background: rgba(25,135,84,.15); color:#198754; display:flex; align-items:center; justify-content:center;">
+                            <i class="bi bi-arrow-up-right-circle"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted" style="font-size:12px;">Strong answers (≥ 75%)</div>
+                            <div style="font-size:20px; font-weight:700;">{{ analytics.strong }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="d-flex align-items-center" style="gap:12px; padding:14px; border:1px solid var(--border-color); border-radius:12px;">
+                        <div style="width:40px; height:40px; border-radius:10px; background: rgba(220,53,69,.15); color:#dc3545; display:flex; align-items:center; justify-content:center;">
+                            <i class="bi bi-arrow-down-right-circle"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted" style="font-size:12px;">Weak answers (< 40%)</div>
+                            <div style="font-size:20px; font-weight:700;">{{ analytics.weak }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    {% for question_text, answer_data in answers.items %}
-        <div class="question-block">
-            <h5><i class="bi bi-question-circle"></i> {{ question_text }}</h5>
-            <p><strong>Your Answer:</strong> {{ answer_data.answer|default:"No answer provided" }}</p>
-            
-            {% if answer_data.score %}
-                <div class="progress mb-2" style="height: 25px;">
-                    {% widthratio answer_data.score 1 100 as percentage %}
-                    <div class="progress-bar {% if answer_data.score >= 0.7 %}bg-success{% elif answer_data.score >= 0.4 %}bg-warning{% else %}bg-danger{% endif %}" 
-                         role="progressbar" 
-                         style="width: {{ percentage }}%">
-                        {{ percentage }}%
+            <!-- Distribution bar -->
+            {% if score_details.total_questions %}
+                {% widthratio analytics.strong score_details.total_questions 100 as strong_pct %}
+                {% widthratio analytics.mid score_details.total_questions 100 as mid_pct %}
+                {% widthratio analytics.weak score_details.total_questions 100 as weak_pct %}
+                <div class="mt-4">
+                    <div class="progress" style="height:12px;">
+                        <div class="progress-bar bg-success" style="width: {{ strong_pct }}%" title="Strong {{ strong_pct }}%"></div>
+                        <div class="progress-bar bg-warning" style="width: {{ mid_pct }}%" title="Mid {{ mid_pct }}%"></div>
+                        <div class="progress-bar bg-danger" style="width: {{ weak_pct }}%" title="Weak {{ weak_pct }}%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted" style="font-size:12px; margin-top:6px;">
+                        <span>Strong {{ strong_pct }}%</span>
+                        <span>Mid {{ mid_pct }}%</span>
+                        <span>Weak {{ weak_pct }}%</span>
                     </div>
                 </div>
             {% endif %}
-            
-            {% if answer_data.keywords %}
-                <div class="feedback">
-                    <strong><i class="bi bi-key"></i> Key Concepts:</strong> 
-                    {% for kw in answer_data.keywords %}
-                        <span class="badge bg-secondary">{{ kw }}</span>
-                    {% endfor %}
+
+            <!-- Keywords -->
+            <div class="row mt-4 g-3">
+                <div class="col-12 col-md-6">
+                    <div class="text-muted" style="font-size:13px;">Frequent keywords covered</div>
+                    {% if analytics.top_keywords %}
+                        <div class="mt-1">
+                            {% for kw in analytics.top_keywords %}
+                                <span class="badge bg-secondary me-2 mb-2">{{ kw }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-muted" style="font-size:13px;">No frequent keywords detected</div>
+                    {% endif %}
                 </div>
+                <div class="col-12 col-md-6">
+                    <div class="text-muted" style="font-size:13px;">Keywords to revisit</div>
+                    {% if analytics.weak_keywords %}
+                        <div class="mt-1">
+                            {% for kw in analytics.weak_keywords %}
+                                <span class="badge bg-danger me-2 mb-2">{{ kw }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-muted" style="font-size:13px;">No weak keywords identified</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="card mb-4" style="padding:20px;">
+            <h3 style="margin-bottom:12px;">Skills Tested</h3>
+            {% if skills %}
+                {% for skill in skills %}
+                    <span class="badge bg-primary me-2 mb-2">{{ skill }}</span>
+                {% endfor %}
+            {% else %}
+                <div class="text-muted" style="font-size:13px;">No skills detected for this session</div>
             {% endif %}
         </div>
-    {% endfor %}
-</div>
 
-<div class="text-center my-4">
-    <a href="{% url 'interview_dashboard' %}" class="btn btn-primary btn-lg">
-        <i class="bi bi-house-door"></i> Back to Dashboard
-    </a>
-    <a href="{% url 'start_interview' %}" class="btn btn-success btn-lg">
-        <i class="bi bi-arrow-repeat"></i> Take Another Interview
-    </a>
-</div>
+        <!-- Answers -->
+        <div class="card" style="padding:20px;">
+            <h3 style="margin-bottom:12px;">Answer Details</h3>
+            {% for question_text, answer_data in answers.items %}
+                {% widthratio answer_data.score 1 100 as pct %}
+                <div style="padding:14px 0; border-top:1px solid var(--border-color);">
+                    <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+                        <h5 style="margin:0;">{{ question_text }}</h5>
+                        <span class="badge {% if answer_data.score >= 0.7 %}bg-success{% elif answer_data.score >= 0.4 %}bg-warning{% else %}bg-danger{% endif %}">{{ pct }}%</span>
+                    </div>
+                    <p style="margin:8px 0 6px 0;"><strong>Your Answer:</strong> {{ answer_data.answer|default:"No answer provided" }}</p>
+                    <div class="progress" style="height:10px;">
+                        <div class="progress-bar {% if answer_data.score >= 0.7 %}bg-success{% elif answer_data.score >= 0.4 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ pct }}%;"></div>
+                    </div>
+                    {% if answer_data.keywords %}
+                    <div class="mt-2">
+                        <span class="text-muted" style="font-size:13px;">Key concepts:</span>
+                        {% for kw in answer_data.keywords %}
+                            <span class="badge bg-secondary me-1">{{ kw }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
 
+            <div class="text-center mt-3">
+                <a href="{% url 'interview_dashboard' %}" class="btn btn-outline-primary me-2">Back to Dashboard</a>
+                <a href="{% url 'start_interview' %}" class="btn btn-primary">Take Another Interview</a>
+            </div>
+        </div>
+    </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}

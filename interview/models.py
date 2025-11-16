@@ -71,6 +71,9 @@ class Profile(models.Model):
     session_id = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100)
     email = models.EmailField()
+    phone = models.CharField(max_length=30, blank=True, null=True)
+    linkedin_url = models.URLField(blank=True, null=True)
+    preferences = models.JSONField(default=dict)  # notification + interview + appearance + privacy settings
     current_level = models.CharField(max_length=50, default='beginner')  # Track user's current difficulty level
     created_at = models.DateTimeField(auto_now_add=True)
 

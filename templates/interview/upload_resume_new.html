@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Resume - Nexora{% endblock %}
+{% block page_title %}Upload Resume{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="text-center mb-4">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary-color), #8b5cf6); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                    <i class="bi bi-cloud-arrow-up" style="font-size: 40px; color: white;"></i>
+                </div>
+                <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">Create Your Candidate Profile</h2>
+                <p style="color: var(--text-muted); margin: 0;">Please upload your resume to get personalized interview questions</p>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <label for="resume" id="dropzone" style="cursor: pointer; display: block; width: 100%;">
+                    <div style="border: 2px dashed var(--border-color); border-radius: 12px; padding: 48px 24px; text-align: center; transition: all 0.2s; background: var(--bg-light); width: 100%;">
+                        <div id="upload-icon" style="margin-bottom: 16px;">
+                            <i class="bi bi-cloud-arrow-up-fill" style="font-size: 64px; color: var(--primary-color);"></i>
+                        </div>
+                        <h5 id="upload-title" style="font-weight: 600; margin-bottom: 8px;">Drag & Drop your resume here</h5>
+                        <p id="upload-subtitle" style="color: var(--text-muted); margin-bottom: 16px;">
+                            Or <span style="color: var(--primary-color); font-weight: 600;">Browse to upload</span>
+                        </p>
+                        <p id="upload-formats" style="font-size: 13px; color: var(--text-muted); margin: 0;">
+                            Supported formats: PDF, DOCX (Max 10MB)
+                        </p>
+                        <div id="upload-badge" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: white; border-radius: 20px; margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--success);">
+                            <i class="bi bi-shield-check"></i>
+                            <span>AI Verified & Secure</span>
+                        </div>
+                    </div>
+                </label>
+                <input type="file" name="resume" id="resume" accept=".pdf,.docx" style="display: none;" required>
+                
+                <div id="file-info" style="display: none; margin-top: 16px; padding: 16px; background: var(--bg-light); border-radius: 8px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="bi bi-file-earmark-check-fill" style="font-size: 24px; color: var(--success);"></i>
+                            <div>
+                                <p id="file-name" style="font-weight: 600; margin: 0;"></p>
+                                <p id="file-size" style="font-size: 13px; color: var(--text-muted); margin: 0;"></p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="removeFile()" style="background: none; border: none; color: var(--danger); cursor: pointer;">
+                            <i class="bi bi-x-circle" style="font-size: 24px;"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary-custom w-100 mt-4" style="justify-content: center; padding: 14px;">
+                    <i class="bi bi-upload"></i>
+                    Upload and Create Profile
+                </button>
+            </form>
+            
+            <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+                <h5 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">What We Extract:</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div style="display: flex; align-items: start; gap: 12px;">
+                            <i class="bi bi-check-circle-fill" style="color: var(--success); margin-top: 2px;"></i>
+                            <div>
+                                <p style="font-weight: 600; margin: 0;">Technical Skills</p>
+                                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Programming languages, frameworks, tools</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="display: flex; align-items: start; gap: 12px;">
+                            <i class="bi bi-check-circle-fill" style="color: var(--success); margin-top: 2px;"></i>
+                            <div>
+                                <p style="font-weight: 600; margin: 0;">Experience</p>
+                                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Years of experience and job history</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="display: flex; align-items: start; gap: 12px;">
+                            <i class="bi bi-check-circle-fill" style="color: var(--success); margin-top: 2px;"></i>
+                            <div>
+                                <p style="font-weight: 600; margin: 0;">Education</p>
+                                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Degrees, institutions, and field of study</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="display: flex; align-items: start; gap: 12px;">
+                            <i class="bi bi-check-circle-fill" style="color: var(--success); margin-top: 2px;"></i>
+                            <div>
+                                <p style="font-weight: 600; margin: 0;">Contact Info</p>
+                                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Email, phone, LinkedIn, GitHub</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const fileInput = document.getElementById('resume');
+const dropzone = document.getElementById('dropzone');
+const fileInfo = document.getElementById('file-info');
+const uploadIcon = document.getElementById('upload-icon');
+const uploadTitle = document.getElementById('upload-title');
+const uploadSubtitle = document.getElementById('upload-subtitle');
+const uploadFormats = document.getElementById('upload-formats');
+const uploadBadge = document.getElementById('upload-badge');
+
+fileInput.addEventListener('change', handleFile);
+
+dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.style.borderColor = 'var(--primary-color)';
+    dropzone.style.background = 'var(--primary-light)';
+});
+
+dropzone.addEventListener('dragleave', () => {
+    dropzone.style.borderColor = 'var(--border-color)';
+    dropzone.style.background = 'var(--bg-light)';
+});
+
+dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.style.borderColor = 'var(--border-color)';
+    dropzone.style.background = 'var(--bg-light)';
+    
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFile();
+    }
+});
+
+function handleFile() {
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('file-size').textContent = `${fileSize} MB`;
+        
+        uploadIcon.style.display = 'none';
+        uploadTitle.style.display = 'none';
+        uploadSubtitle.style.display = 'none';
+        uploadFormats.style.display = 'none';
+        uploadBadge.style.display = 'none';
+        fileInfo.style.display = 'block';
+        
+        dropzone.style.borderColor = 'var(--success)';
+        dropzone.style.background = 'rgba(16, 185, 129, 0.05)';
+    }
+}
+
+function removeFile() {
+    fileInput.value = '';
+    uploadIcon.style.display = 'block';
+    uploadTitle.style.display = 'block';
+    uploadSubtitle.style.display = 'block';
+    uploadFormats.style.display = 'block';
+    uploadBadge.style.display = 'inline-flex';
+    fileInfo.style.display = 'none';
+    dropzone.style.borderColor = 'var(--border-color)';
+    dropzone.style.background = 'var(--bg-light)';
+}
+</script>
+{% endblock %}

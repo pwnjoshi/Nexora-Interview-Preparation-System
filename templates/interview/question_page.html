@@ -1,37 +1,43 @@
-<h2>Interview in Progress</h2>
-<p>Question {{ question_number }} of 10</p>
+{% extends 'base.html' %}
 
-{% if current_level %}
-<div class="alert alert-info">
-    <strong>Current Difficulty:</strong> 
-    <span class="badge 
-        {% if current_level == 'beginner' %}bg-success
-        {% elif current_level == 'intermediate' %}bg-warning
-        {% else %}bg-danger{% endif %}">
-        {{ current_level|title }}
-    </span>
-    {% if question_number > 1 %}
-        <small class="text-muted">
-            💡 Questions adapt based on your performance!
-        </small>
-    {% endif %}
+{% block title %}Interview in Progress{% endblock %}
+{% block page_title %}Interview in Progress{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card" style="padding: 20px;">
+            <div style="display:flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+                <h2 style="margin:0; font-size: 22px;">Question {{ question_number }} of {{ total_questions }}</h2>
+                {% widthratio question_number total_questions 100 as pct %}
+                <div style="font-size:14px; color: var(--text-muted);">{{ pct }}% complete</div>
+            </div>
+
+            {% if current_level %}
+            <div style="margin-top: 8px;">
+                <span style="font-weight:600;">Current Difficulty:</span>
+                <span style="display:inline-block; padding:2px 10px; border-radius:12px; background: var(--bg-light); border:1px solid var(--border-color); text-transform: capitalize;">{{ current_level }}</span>
+                <span style="margin-left:10px; color: var(--text-muted); font-size: 13px;">Fixed set of {{ total_questions }} questions (3 per level).</span>
+            </div>
+            {% endif %}
+
+            <hr style="margin: 16px 0;">
+
+            <div>
+                <h3 style="font-size: 20px; line-height: 28px; margin-bottom: 12px;">{{ question.text }}</h3>
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ pct }}%;"></div>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <textarea name="answer" rows="10" class="form-control" placeholder="Type your answer here..." required></textarea>
+                <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn btn-primary">Submit Answer and Go to Next Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-{% endif %}
-
-<hr>
-
-<h3>{{ question.text }}</h3>
-
-<form method="POST">
-    {% csrf_token %}
-    <textarea 
-        name="answer" 
-        rows="10" 
-        cols="80" 
-        class="form-control"
-        placeholder="Type your answer here..."
-        required
-    ></textarea>
-    <br><br>
-    <button type="submit" class="btn btn-primary">Submit Answer and Go to Next Question</button>
-</form>
+{% endblock %}

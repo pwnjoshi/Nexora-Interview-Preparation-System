@@ -9,34 +9,38 @@ from .answer_evaluation import (
 )
 from .db_operations import get_questions_by_skills, save_answers, get_session_data
 from .models import Question
+import random
 
 
 # ============================================================
 # FIXED QUESTION SELECTION FOR INTERVIEW (10 QUESTIONS TOTAL)
 # ============================================================
 
-def get_fixed_interview_questions(skills):
-    """
-    Return EXACTLY 10 questions for an interview:
-       - 4 beginner
-       - 3 intermediate
-       - 3 hard
+def get_fixed_interview_questions(skills, counts=None, total=None):
+    """Return a fixed set of questions by level counts.
+
+    Default distribution (legacy): 4 beginner, 3 intermediate, 3 hard (total 10).
+    For reverting to previous criteria (3 each level): pass counts={'beginner':3,'intermediate':3,'hard':3}.
 
     Args:
-        skills (list): Extracted skills from resume
+        skills (list): extracted skills
+        counts (dict): level -> count desired
+        total (int): optional total cap; if omitted uses sum(counts)
 
     Returns:
-        list of question dictionaries
+        list[dict]
     """
-
-    # If skills are invalid or empty, default to empty list
     if not skills or not isinstance(skills, list):
         skills = []
 
-    # Fetch questions by skills (large pool)
-    all_questions = get_questions_by_skills(skills, limit=200)
+    # Default distribution
+    if counts is None:
+        counts = {"beginner": 4, "intermediate": 3, "hard": 3}
 
-    # If no skill-based questions found, use all questions
+    if total is None:
+        total = sum(counts.values())
+
+    all_questions = get_questions_by_skills(skills, limit=300)
     if not all_questions:
         all_questions = [
             {
@@ -48,30 +52,24 @@ def get_fixed_interview_questions(skills):
             for q in Question.objects.all()
         ]
 
-    # Split by difficulty
-    beginner = [q for q in all_questions if q.get("level") == "beginner"]
-    intermediate = [q for q in all_questions if q.get("level") == "intermediate"]
-    hard = [q for q in all_questions if q.get("level") == "hard"]
-
-    # Helper to pick N questions
-    def pick(question_list, n):
-        if len(question_list) >= n:
-            return question_list[:n]
-        return question_list
+    # Group by level
+    grouped = {"beginner": [], "intermediate": [], "hard": []}
+    for q in all_questions:
+        lvl = q.get("level", "beginner")
+        if lvl in grouped:
+            grouped[lvl].append(q)
 
     selected = []
+    for lvl, cnt in counts.items():
+        bucket = grouped.get(lvl, [])
+        selected.extend(bucket[:cnt])
 
-    # Pick fixed difficulty counts
-    selected.extend(pick(beginner, 4))
-    selected.extend(pick(intermediate, 3))
-    selected.extend(pick(hard, 3))
-
-    # If less than 10, fill from remaining pool
-    if len(selected) < 10:
+    # Fill remainder if under target total
+    if len(selected) < total:
         remaining = [q for q in all_questions if q not in selected]
-        selected.extend(remaining[:(10 - len(selected))])
+        selected.extend(remaining[: (total - len(selected))])
 
-    return selected[:10]
+    return selected[:total]
 
 
 # ============================================================
@@ -149,20 +147,13 @@ def evaluate_interview_answers(user_id, field, current_level, user_answers):
 # OLD ADAPTIVE QUESTION FUNCTION (KEPT FOR COMPATIBILITY)
 # ============================================================
 
-def get_adaptive_questions(skills, current_level='beginner', limit=5):
-    """
-    Adaptive fallback (unused in fixed interviews).
-    
-    Returns questions matching a difficulty level.
-    """
-
+def _build_question_pool(skills):
+    """Return a pool of questions (skill-matched first, fallback to all)."""
     if not skills or not isinstance(skills, list):
         skills = []
-
-    all_questions = get_questions_by_skills(skills, limit=100) if skills else []
-
-    if not all_questions:
-        all_questions = [
+    pool = get_questions_by_skills(skills, limit=300)
+    if not pool:
+        pool = [
             {
                 "keywords": q.keywords if q.keywords else [],
                 "question_text": q.question_text,
@@ -171,13 +162,85 @@ def get_adaptive_questions(skills, current_level='beginner', limit=5):
             }
             for q in Question.objects.all()
         ]
+    # Shuffle for variety but keep deterministic slice use later
+    random.shuffle(pool)
+    return pool
 
-    level_questions = [
-        q for q in all_questions 
-        if q.get('level', 'beginner') == current_level
-    ]
 
-    return level_questions[:limit]
+def get_adaptive_questions(skills, answered, target_total=10, base_level='beginner'):
+    """
+    Real-time adaptive question selection.
+
+    Args:
+        skills (list): extracted skills
+        answered (list[dict]): list of {'question_text','score','level'} already answered
+        target_total (int): interview length
+        base_level (str): starting difficulty
+
+    Returns:
+        dict | None: next question dictionary or None if interview complete
+
+    Policy:
+        - Target distribution: 4 beginner, 3 intermediate, 3 hard (like fixed mode)
+        - Difficulty escalation: if rolling avg (last 2) > 0.75 and quota not met -> move up
+        - Difficulty de-escalation: if rolling avg (last 2) < 0.40 -> move down (unless already beginner)
+        - Otherwise maintain current level
+        - Avoid duplicates; fallback to any remaining question if quota depleted
+    """
+    # Interview complete
+    if len(answered) >= target_total:
+        return None
+
+    pool = _build_question_pool(skills)
+
+    # Keep track of used question texts for exclusion
+    used_texts = {a['question_text'] for a in answered}
+
+    # Count per level answered so far
+    counts = {'beginner': 0, 'intermediate': 0, 'hard': 0}
+    for a in answered:
+        lvl = a.get('level','beginner')
+        if lvl in counts:
+            counts[lvl] += 1
+
+    # Determine current working level
+    last_level = answered[-1]['level'] if answered else base_level
+
+    # Rolling performance
+    recent = answered[-2:]  # last two answers
+    avg_recent = sum(a.get('score',0) for a in recent) / len(recent) if recent else 0
+
+    # Desired level before distribution constraints
+    desired = last_level
+    escalate_map = {'beginner': 'intermediate', 'intermediate': 'hard'}
+    descend_map = {'hard': 'intermediate', 'intermediate': 'beginner'}
+
+    if avg_recent > 0.75 and last_level in escalate_map:
+        desired = escalate_map[last_level]
+    elif avg_recent < 0.40 and last_level in descend_map:
+        desired = descend_map[last_level]
+
+    # Enforce distribution caps (4/3/3)
+    caps = {'beginner': 4, 'intermediate': 3, 'hard': 3}
+    if counts.get(desired,0) >= caps[desired]:
+        # Pick a level with remaining quota (priority order beginner->intermediate->hard)
+        for lvl in ['beginner','intermediate','hard']:
+            if counts[lvl] < caps[lvl]:
+                desired = lvl
+                break
+
+    # Filter candidate questions
+    candidates = [q for q in pool if q.get('level') == desired and q.get('question_text') not in used_texts]
+
+    if not candidates:
+        # Fallback: any unused question
+        candidates = [q for q in pool if q.get('question_text') not in used_texts]
+
+    if not candidates:
+        return None  # No questions available
+
+    # Select first candidate (pool shuffled earlier)
+    return candidates[0]
 
 
 # ============================================================

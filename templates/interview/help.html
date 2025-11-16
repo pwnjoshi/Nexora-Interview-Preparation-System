@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Help - Nexora{% endblock %}
+{% block page_title %}Help & Support{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4" style="background: linear-gradient(135deg, var(--primary-color), #8b5cf6); color: white; border: none;">
+            <div class="text-center">
+                <i class="bi bi-question-circle" style="font-size: 64px; margin-bottom: 16px; opacity: 0.9;"></i>
+                <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">How can we help you?</h2>
+                <p style="opacity: 0.9; margin: 0;">Find answers to common questions and get support</p>
+            </div>
+        </div>
+        
+        <!-- Search -->
+        <div class="card mb-4">
+            <div class="input-group">
+                <span class="input-group-text" style="background: var(--bg-light); border: 1px solid var(--border-color);">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" placeholder="Search for help..." style="border: 1px solid var(--border-color); padding: 12px;">
+            </div>
+        </div>
+        
+        <!-- FAQ Categories -->
+        <div class="card mb-4">
+            <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 24px;">Frequently Asked Questions</h4>
+            
+            <div class="accordion" id="faqAccordion">
+                <!-- Getting Started -->
+                <div class="accordion-item" style="border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" style="font-weight: 600;">
+                            <i class="bi bi-rocket-takeoff me-2" style="color: var(--primary-color);"></i>
+                            How do I get started with Nexora?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <ol style="margin: 0; padding-left: 20px;">
+                                <li style="margin-bottom: 8px;"><strong>Upload your resume</strong> - Go to "Upload Resume" and upload your PDF or DOCX file</li>
+                                <li style="margin-bottom: 8px;"><strong>AI extracts your skills</strong> - Our system analyzes your resume and identifies your technical skills</li>
+                                <li style="margin-bottom: 8px;"><strong>Start practicing</strong> - Begin mock interviews tailored to your skill set</li>
+                                <li><strong>Get feedback</strong> - Receive detailed feedback and improve your interview skills</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Resume Upload -->
+                <div class="accordion-item" style="border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" style="font-weight: 600;">
+                            <i class="bi bi-file-earmark-text me-2" style="color: var(--primary-color);"></i>
+                            What information does Nexora extract from my resume?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Nexora's AI analyzes your resume to extract:
+                            <ul style="margin-top: 12px; padding-left: 20px;">
+                                <li><strong>Technical Skills</strong> - Programming languages, frameworks, tools, databases</li>
+                                <li><strong>Experience</strong> - Years of professional experience and job titles</li>
+                                <li><strong>Education</strong> - Degrees, institutions, and fields of study</li>
+                                <li><strong>Contact Information</strong> - Email, phone, LinkedIn, GitHub profiles</li>
+                                <li><strong>Skill Categories</strong> - Organized into Web Dev, AI/ML, Cloud, Security, etc.</li>
+                            </ul>
+                            <p style="margin-top: 12px; margin-bottom: 0;">Your data is encrypted and never shared with third parties.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Interview Questions -->
+                <div class="accordion-item" style="border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" style="font-weight: 600;">
+                            <i class="bi bi-chat-square-text me-2" style="color: var(--primary-color);"></i>
+                            How are interview questions selected?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p>Nexora uses a <strong>fixed distribution model</strong> for consistent practice:</p>
+                            <ul style="padding-left: 20px;">
+                                <li>3 Beginner level questions</li>
+                                <li>3 Intermediate level questions</li>
+                                <li>3 Advanced/Hard level questions</li>
+                            </ul>
+                            <p style="margin-top: 12px; margin-bottom: 0;">Questions are matched to your skill set from the resume analysis, ensuring relevant practice for your background.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Scoring -->
+                <div class="accordion-item" style="border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" style="font-weight: 600;">
+                            <i class="bi bi-graph-up me-2" style="color: var(--primary-color);"></i>
+                            How is my interview performance scored?
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p>Your answers are evaluated using <strong>AI-powered keyword matching</strong>:</p>
+                            <ul style="padding-left: 20px;">
+                                <li><strong>Keyword Analysis</strong> - Checks for technical terms and concepts</li>
+                                <li><strong>Completeness</strong> - Evaluates coverage of key points</li>
+                                <li><strong>Level Assessment</strong> - Determines if you should progress to harder questions</li>
+                            </ul>
+                            <p style="margin-top: 12px; margin-bottom: 0;">You'll receive detailed feedback showing which keywords you covered and areas for improvement.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Privacy -->
+                <div class="accordion-item" style="border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5" style="font-weight: 600;">
+                            <i class="bi bi-shield-check me-2" style="color: var(--primary-color);"></i>
+                            Is my data secure and private?
+                        </button>
+                    </h2>
+                    <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p><strong>Yes, absolutely.</strong> We take your privacy seriously:</p>
+                            <ul style="padding-left: 20px;">
+                                <li>All data is encrypted in transit and at rest</li>
+                                <li>Your resume is only used for skill extraction</li>
+                                <li>We never share your data with third parties</li>
+                                <li>You can delete your data anytime from Settings</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Technical Issues -->
+                <div class="accordion-item" style="border: 1px solid var(--border-color); border-radius: 8px;">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6" style="font-weight: 600;">
+                            <i class="bi bi-tools me-2" style="color: var(--primary-color);"></i>
+                            What if I encounter technical issues?
+                        </button>
+                    </h2>
+                    <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p>Try these troubleshooting steps:</p>
+                            <ul style="padding-left: 20px;">
+                                <li>Clear your browser cache and cookies</li>
+                                <li>Try a different browser (Chrome, Firefox, Edge recommended)</li>
+                                <li>Ensure your resume file is under 10MB</li>
+                                <li>Check that your resume is in PDF or DOCX format</li>
+                            </ul>
+                            <p style="margin-top: 12px; margin-bottom: 0;">Still having issues? Contact support below.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Support -->
+        <div class="card">
+            <div class="text-center">
+                <i class="bi bi-envelope" style="font-size: 48px; color: var(--primary-color); margin-bottom: 16px;"></i>
+                <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 12px;">Still need help?</h4>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Our support team is here to assist you</p>
+                <a href="mailto:support@nexora.ai" class="btn-primary-custom">
+                    <i class="bi bi-send"></i>
+                    Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
