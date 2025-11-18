@@ -3,7 +3,6 @@
 from djongo import models
 from django.contrib.auth.models import User
 
-
 #  Resume Storage Model
 class Resume(models.Model):
     username = models.CharField(max_length=100)

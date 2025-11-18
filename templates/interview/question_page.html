@@ -9,7 +9,7 @@
         <div class="card" style="padding: 20px;">
             <div style="display:flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
                 <h2 style="margin:0; font-size: 22px;">Question {{ question_number }} of {{ total_questions }}</h2>
-                {% widthratio question_number total_questions 100 as pct %}
+                {% widthratio question_number|add:"-1" total_questions 100 as pct %}
                 <div style="font-size:14px; color: var(--text-muted);">{{ pct }}% complete</div>
             </div>
 
@@ -17,7 +17,11 @@
             <div style="margin-top: 8px;">
                 <span style="font-weight:600;">Current Difficulty:</span>
                 <span style="display:inline-block; padding:2px 10px; border-radius:12px; background: var(--bg-light); border:1px solid var(--border-color); text-transform: capitalize;">{{ current_level }}</span>
-                <span style="margin-left:10px; color: var(--text-muted); font-size: 13px;">Fixed set of {{ total_questions }} questions (3 per level).</span>
+                {% if interview_mode == 'adaptive' %}
+                    <span style="margin-left:10px; color: var(--text-muted); font-size: 13px;">Adaptive interview • Questions adjust to your performance.</span>
+                {% else %}
+                    <span style="margin-left:10px; color: var(--text-muted); font-size: 13px;">Fixed set of {{ total_questions }} questions (3 per level).</span>
+                {% endif %}
             </div>
             {% endif %}
 

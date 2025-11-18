@@ -5,7 +5,9 @@ from .answer_evaluation import (
     evaluate_user_level,
     build_flag_record,
     next_level_from_flag,
-    keyword_match_score
+    keyword_match_score,
+    composite_answer_score,
+    composite_breakdown,
 )
 from .db_operations import get_questions_by_skills, save_answers, get_session_data
 from .models import Question
@@ -87,7 +89,8 @@ def score_single_answer(answer_text, expected_keywords):
     Returns:
         float: score between 0 and 1
     """
-    return keyword_match_score(answer_text, expected_keywords)
+    # Use composite scoring instead of plain keyword matching
+    return composite_answer_score(answer_text, expected_keywords)
 
 
 # ============================================================
@@ -116,8 +119,10 @@ def evaluate_interview_answers(user_id, field, current_level, user_answers):
 
     # Perform scoring
     per_question, avg_score, overall_flag = evaluate_user_level(
-        user_answers, 
-        level_bank
+        user_answers,
+        level_bank,
+        use_composite=True,
+        level=current_level,
     )
 
     # Determine next difficulty

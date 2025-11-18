@@ -5,171 +5,345 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-lg-10 mx-auto">
-        <!-- Overall -->
-        <div class="card mb-4" style="padding:20px;">
-            <div style="display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-                <div>
-                    <h3 style="margin:0;">Overall Performance</h3>
-                    <div style="color:var(--text-muted); font-size:13px;">{{ score_details.total_questions }} questions • Level: {{ session.current_level|default:"Beginner"|title }}</div>
+    <div class="col-lg-11 mx-auto">
+        <!-- Hero Score Card -->
+        <div class="card mb-4" style="padding:28px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+            <div class="row align-items-center g-4">
+                <div class="col-md-8">
+                    <h2 style="margin:0 0 8px 0; font-size:28px; font-weight:700;">Interview Complete!</h2>
+                    <div style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">
+                        {{ score_details.total_questions }} questions • {{ session.current_level|default:"Beginner"|title }} level
+                    </div>
+                    
+                    {% if session.recommended_next_level and session.recommended_next_level != session.current_level %}
+                    <div class="alert alert-success" style="margin:0; padding:12px 16px;">
+                        <i class="bi bi-arrow-up-circle"></i> Ready to advance: <strong>{{ session.current_level|title }} → {{ session.recommended_next_level|title }}</strong>
+                    </div>
+                    {% elif session.evaluation_flag == 'Easier' %}
+                    <div class="alert alert-warning" style="margin:0; padding:12px 16px;">
+                        <i class="bi bi-exclamation-triangle"></i> Consider revisiting fundamentals before moving up.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info" style="margin:0; padding:12px 16px;">
+                        <i class="bi bi-lightbulb"></i> Keep practicing to strengthen consistency.
+                    </div>
+                    {% endif %}
                 </div>
-                <div style="display:flex; align-items:center; gap:16px;">
-                    <div style="font-size:28px; font-weight:700;">{{ score_details.percentage }}%</div>
-                    <span style="display:inline-block; padding:6px 12px; border:1px solid var(--border-color); border-radius:8px; font-weight:600;">Grade {{ score_details.grade }}</span>
+                
+                <div class="col-md-4 text-center">
+                    <div class="progress-circle" style="--progress: {{ score_details.percentage }}%; background: conic-gradient(var(--primary-color) 0% {{ score_details.percentage }}%, #e9ecef {{ score_details.percentage }}% 100%); width:140px; height:140px; margin:0 auto;">
+                        <div class="progress-text" style="background:#fff; font-size:32px; font-weight:700;">{{ score_details.percentage }}%</div>
+                    </div>
+                    <div style="margin-top:12px; font-size:18px; font-weight:600;">Grade {{ score_details.grade }}</div>
+                    <div style="color:var(--text-muted); font-size:13px;">{{ score_details.feedback }}</div>
                 </div>
             </div>
 
-            {% if session.recommended_next_level and session.recommended_next_level != session.current_level %}
-            <div class="alert alert-success mt-3">
-                Ready to advance: {{ session.current_level|title }} → {{ session.recommended_next_level|title }}
+            {% if marks %}
+            <hr style="margin:20px 0;">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div style="text-align:center; padding:16px; background:#fff; border-radius:8px;">
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Marks Earned</div>
+                        <div style="font-size:24px; font-weight:700;">{{ marks.total_marks_earned }}<span style="font-size:16px; color:var(--text-muted);">/{{ marks.total_marks_possible }}</span></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="text-align:center; padding:16px; background:#fff; border-radius:8px;">
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Performance Level</div>
+                        <div style="font-size:24px; font-weight:700;">{{ marks.performance_level }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="text-align:center; padding:16px; background:#fff; border-radius:8px;">
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Mark-Based Score</div>
+                        <div style="font-size:24px; font-weight:700;">{{ marks.final_percentage }}%</div>
+                    </div>
+                </div>
             </div>
-            {% elif session.evaluation_flag == 'Easier' %}
-            <div class="alert alert-warning mt-3">Consider revisiting fundamentals before moving up.</div>
-            {% else %}
-            <div class="alert alert-info mt-3">Keep practicing to strengthen consistency.</div>
             {% endif %}
+        </div>
 
-            <div class="alert alert-secondary mt-2" style="margin-bottom:0;">
-                {{ score_details.feedback }}
+        <!-- Analytics Dashboard -->
+        <div class="row g-3 mb-4">
+            <!-- Quick Stats -->
+            <div class="col-md-6">
+                <div class="card" style="padding:20px; height:100%;">
+                    <h4 style="font-size:18px; font-weight:600; margin:0 0 16px 0;">Quick Stats</h4>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div style="text-align:center; padding:12px; background:var(--bg-light); border-radius:8px;">
+                                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Avg Score</div>
+                                <div style="font-size:28px; font-weight:700; color:var(--primary-color); margin-top:4px;">{{ analytics.avg_pct }}%</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="text-align:center; padding:12px; background:var(--bg-light); border-radius:8px;">
+                                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Strong</div>
+                                <div style="font-size:28px; font-weight:700; color:#22c55e; margin-top:4px;">{{ analytics.strong }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="text-align:center; padding:12px; background:var(--bg-light); border-radius:8px;">
+                                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Mid</div>
+                                <div style="font-size:28px; font-weight:700; color:#f59e0b; margin-top:4px;">{{ analytics.mid }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="text-align:center; padding:12px; background:var(--bg-light); border-radius:8px;">
+                                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Weak</div>
+                                <div style="font-size:28px; font-weight:700; color:#ef4444; margin-top:4px;">{{ analytics.weak }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score Breakdown -->
+            <div class="col-md-6">
+                <div class="card" style="padding:20px; height:100%;">
+                    <h4 style="font-size:18px; font-weight:600; margin:0 0 16px 0;">Score Breakdown</h4>
+                    {% with bd=analytics.breakdown_overall %}
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span style="font-size:13px;">Coverage</span>
+                            <span style="font-size:13px; font-weight:600;">{{ bd.coverage|default:0 }}%</span>
+                        </div>
+                        <div class="progress" style="height:8px;"><div class="progress-bar" style="width: {{ bd.coverage|default:0 }}%; background:#6366f1;"></div></div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span style="font-size:13px;">Structure</span>
+                            <span style="font-size:13px; font-weight:600;">{{ bd.structure|default:0 }}%</span>
+                        </div>
+                        <div class="progress" style="height:8px;"><div class="progress-bar" style="width: {{ bd.structure|default:0 }}%; background:#8b5cf6;"></div></div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span style="font-size:13px;">Clarity</span>
+                            <span style="font-size:13px; font-weight:600;">{{ bd.clarity|default:0 }}%</span>
+                        </div>
+                        <div class="progress" style="height:8px;"><div class="progress-bar" style="width: {{ bd.clarity|default:0 }}%; background:#06b6d4;"></div></div>
+                    </div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span style="font-size:13px;">Depth</span>
+                            <span style="font-size:13px; font-weight:600;">{{ bd.depth|default:0 }}%</span>
+                        </div>
+                        <div class="progress" style="height:8px;"><div class="progress-bar" style="width: {{ bd.depth|default:0 }}%; background:#10b981;"></div></div>
+                    </div>
+                    {% endwith %}
+                </div>
             </div>
         </div>
 
-        <!-- Analytics -->
+        <!-- Distribution & Keywords -->
         <div class="card mb-4" style="padding:20px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                <h3 style="margin:0;">Analytics</h3>
-                {% if score_details.total_questions %}
-                    <span class="text-muted" style="font-size:12px;">Based on {{ score_details.total_questions }} answers</span>
-                {% endif %}
-            </div>
-
-            <!-- Stat cards -->
-            <div class="row mt-3 g-3">
-                <div class="col-12 col-md-4">
-                    <div class="d-flex align-items-center" style="gap:12px; padding:14px; border:1px solid var(--border-color); border-radius:12px;">
-                        <div style="width:40px; height:40px; border-radius:10px; background: linear-gradient(135deg, var(--primary-color), #8b5cf6); color:#fff; display:flex; align-items:center; justify-content:center;">
-                            <i class="bi bi-speedometer2"></i>
-                        </div>
-                        <div>
-                            <div class="text-muted" style="font-size:12px;">Average per question</div>
-                            <div style="font-size:20px; font-weight:700;">{{ analytics.avg_pct }}%</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="d-flex align-items-center" style="gap:12px; padding:14px; border:1px solid var(--border-color); border-radius:12px;">
-                        <div style="width:40px; height:40px; border-radius:10px; background: rgba(25,135,84,.15); color:#198754; display:flex; align-items:center; justify-content:center;">
-                            <i class="bi bi-arrow-up-right-circle"></i>
-                        </div>
-                        <div>
-                            <div class="text-muted" style="font-size:12px;">Strong answers (≥ 75%)</div>
-                            <div style="font-size:20px; font-weight:700;">{{ analytics.strong }}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="d-flex align-items-center" style="gap:12px; padding:14px; border:1px solid var(--border-color); border-radius:12px;">
-                        <div style="width:40px; height:40px; border-radius:10px; background: rgba(220,53,69,.15); color:#dc3545; display:flex; align-items:center; justify-content:center;">
-                            <i class="bi bi-arrow-down-right-circle"></i>
-                        </div>
-                        <div>
-                            <div class="text-muted" style="font-size:12px;">Weak answers (< 40%)</div>
-                            <div style="font-size:20px; font-weight:700;">{{ analytics.weak }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Distribution bar -->
+            <h4 style="font-size:18px; font-weight:600; margin:0 0 16px 0;">Performance Distribution</h4>
+            
             {% if score_details.total_questions %}
                 {% widthratio analytics.strong score_details.total_questions 100 as strong_pct %}
                 {% widthratio analytics.mid score_details.total_questions 100 as mid_pct %}
                 {% widthratio analytics.weak score_details.total_questions 100 as weak_pct %}
-                <div class="mt-4">
-                    <div class="progress" style="height:12px;">
-                        <div class="progress-bar bg-success" style="width: {{ strong_pct }}%" title="Strong {{ strong_pct }}%"></div>
-                        <div class="progress-bar bg-warning" style="width: {{ mid_pct }}%" title="Mid {{ mid_pct }}%"></div>
-                        <div class="progress-bar bg-danger" style="width: {{ weak_pct }}%" title="Weak {{ weak_pct }}%"></div>
+                <div style="margin-bottom:20px;">
+                    <div class="progress" style="height:24px; border-radius:12px;">
+                        <div class="progress-bar" style="width: {{ strong_pct }}%; background:#22c55e; font-size:13px; font-weight:600;" title="Strong {{ strong_pct }}%">
+                            {% if strong_pct > 15 %}{{ strong_pct }}%{% endif %}
+                        </div>
+                        <div class="progress-bar" style="width: {{ mid_pct }}%; background:#f59e0b; font-size:13px; font-weight:600;" title="Mid {{ mid_pct }}%">
+                            {% if mid_pct > 15 %}{{ mid_pct }}%{% endif %}
+                        </div>
+                        <div class="progress-bar" style="width: {{ weak_pct }}%; background:#ef4444; font-size:13px; font-weight:600;" title="Weak {{ weak_pct }}%">
+                            {% if weak_pct > 15 %}{{ weak_pct }}%{% endif %}
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between text-muted" style="font-size:12px; margin-top:6px;">
-                        <span>Strong {{ strong_pct }}%</span>
-                        <span>Mid {{ mid_pct }}%</span>
-                        <span>Weak {{ weak_pct }}%</span>
+                    <div class="d-flex justify-content-between" style="margin-top:8px; font-size:12px; color:var(--text-muted);">
+                        <span><i class="bi bi-circle-fill" style="color:#22c55e; font-size:8px;"></i> Strong (≥75%): {{ analytics.strong }}</span>
+                        <span><i class="bi bi-circle-fill" style="color:#f59e0b; font-size:8px;"></i> Mid (40-74%): {{ analytics.mid }}</span>
+                        <span><i class="bi bi-circle-fill" style="color:#ef4444; font-size:8px;"></i> Weak (<40%): {{ analytics.weak }}</span>
                     </div>
                 </div>
             {% endif %}
 
-            <!-- Keywords -->
-            <div class="row mt-4 g-3">
-                <div class="col-12 col-md-6">
-                    <div class="text-muted" style="font-size:13px;">Frequent keywords covered</div>
-                    {% if analytics.top_keywords %}
-                        <div class="mt-1">
-                            {% for kw in analytics.top_keywords %}
-                                <span class="badge bg-secondary me-2 mb-2">{{ kw }}</span>
-                            {% endfor %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div style="padding:14px; background:rgba(34,197,94,0.05); border:1px solid rgba(34,197,94,0.2); border-radius:8px;">
+                        <div style="font-size:13px; font-weight:600; margin-bottom:8px; color:#15803d;">
+                            <i class="bi bi-check-circle"></i> Strengths
                         </div>
-                    {% else %}
-                        <div class="text-muted" style="font-size:13px;">No frequent keywords detected</div>
-                    {% endif %}
+                        {% if analytics.top_keywords %}
+                            <div>
+                                {% for kw in analytics.top_keywords %}
+                                    <span class="badge" style="background:#22c55e; margin-right:6px; margin-bottom:6px;">{{ kw }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div style="font-size:12px; color:var(--text-muted);">Complete more interviews to identify strengths</div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="col-12 col-md-6">
-                    <div class="text-muted" style="font-size:13px;">Keywords to revisit</div>
-                    {% if analytics.weak_keywords %}
-                        <div class="mt-1">
-                            {% for kw in analytics.weak_keywords %}
-                                <span class="badge bg-danger me-2 mb-2">{{ kw }}</span>
-                            {% endfor %}
+                <div class="col-md-6">
+                    <div style="padding:14px; background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.2); border-radius:8px;">
+                        <div style="font-size:13px; font-weight:600; margin-bottom:8px; color:#b91c1c;">
+                            <i class="bi bi-exclamation-circle"></i> Focus Areas
                         </div>
-                    {% else %}
-                        <div class="text-muted" style="font-size:13px;">No weak keywords identified</div>
-                    {% endif %}
+                        {% if analytics.weak_keywords %}
+                            <div>
+                                {% for kw in analytics.weak_keywords %}
+                                    <span class="badge" style="background:#ef4444; margin-right:6px; margin-bottom:6px;">{{ kw }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div style="font-size:12px; color:var(--text-muted);">Great job! No weak areas identified</div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Skills -->
-        <div class="card mb-4" style="padding:20px;">
-            <h3 style="margin-bottom:12px;">Skills Tested</h3>
-            {% if skills %}
-                {% for skill in skills %}
-                    <span class="badge bg-primary me-2 mb-2">{{ skill }}</span>
-                {% endfor %}
-            {% else %}
-                <div class="text-muted" style="font-size:13px;">No skills detected for this session</div>
-            {% endif %}
-        </div>
-
-        <!-- Answers -->
+        <!-- Answer Details (Collapsible) -->
         <div class="card" style="padding:20px;">
-            <h3 style="margin-bottom:12px;">Answer Details</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h4 style="font-size:18px; font-weight:600; margin:0;">Answer Details</h4>
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleAllAnswers()" id="toggleBtn">
+                    <i class="bi bi-chevron-down"></i> Expand All
+                </button>
+            </div>
+
             {% for question_text, answer_data in answers.items %}
                 {% widthratio answer_data.score 1 100 as pct %}
-                <div style="padding:14px 0; border-top:1px solid var(--border-color);">
-                    <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
-                        <h5 style="margin:0;">{{ question_text }}</h5>
-                        <span class="badge {% if answer_data.score >= 0.7 %}bg-success{% elif answer_data.score >= 0.4 %}bg-warning{% else %}bg-danger{% endif %}">{{ pct }}%</span>
+                <div class="answer-item" style="border-top:1px solid var(--border-color); padding:16px 0;">
+                    <div class="answer-header" style="cursor:pointer;" onclick="toggleAnswer(this)">
+                        <div style="display:flex; justify-content:space-between; align-items:start; gap:12px;">
+                            <div style="flex:1;">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                    <i class="bi bi-chevron-right toggle-icon" style="transition:transform 0.2s; color:var(--text-muted);"></i>
+                                    <h5 style="margin:0; font-size:16px; font-weight:600;">{{ question_text }}</h5>
+                                </div>
+                                {% if answer_data.keywords %}
+                                <div style="margin-left:24px; font-size:12px; color:var(--text-muted);">
+                                    {% for kw in answer_data.keywords|slice:":3" %}
+                                        <span>{{ kw }}</span>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                    {% if answer_data.keywords|length > 3 %}...{% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div style="text-align:right;">
+                                <span class="badge {% if answer_data.score >= 0.7 %}bg-success{% elif answer_data.score >= 0.4 %}bg-warning text-dark{% else %}bg-danger{% endif %}" style="font-size:14px; padding:6px 12px;">{{ pct }}%</span>
+                            </div>
+                        </div>
                     </div>
-                    <p style="margin:8px 0 6px 0;"><strong>Your Answer:</strong> {{ answer_data.answer|default:"No answer provided" }}</p>
-                    <div class="progress" style="height:10px;">
-                        <div class="progress-bar {% if answer_data.score >= 0.7 %}bg-success{% elif answer_data.score >= 0.4 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ pct }}%;"></div>
+
+                    <div class="answer-content" style="display:none; margin-top:12px; margin-left:24px; padding:12px; background:var(--bg-light); border-radius:8px;">
+                        <div style="margin-bottom:12px;">
+                            <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">YOUR ANSWER</div>
+                            <div style="font-size:14px; line-height:1.6;">
+                                {{ answer_data.answer|default:"No answer provided" }}
+                                {% if answer_data.echo_answer %}
+                                <div class="alert alert-warning" style="font-size:12px; padding:8px 12px; margin-top:8px;">
+                                    <i class="bi bi-info-circle"></i> Tip: Avoid repeating the question; provide your own detailed answer.
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if answer_data.breakdown %}
+                        <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border-color);">
+                            <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">SCORE BREAKDOWN</div>
+                            {% with bd=answer_data.breakdown %}
+                            <div class="row g-2">
+                                <div class="col-6 col-md-3">
+                                    <div style="text-align:center; padding:8px; background:#fff; border-radius:6px;">
+                                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">COVERAGE</div>
+                                        {% widthratio bd.coverage 1 100 as covp %}
+                                        <div class="progress" style="height:6px; margin:4px 0;"><div class="progress-bar" style="width: {{ covp }}%; background:#6366f1;"></div></div>
+                                        <div style="font-size:13px; font-weight:600;">{{ covp }}%</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div style="text-align:center; padding:8px; background:#fff; border-radius:6px;">
+                                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">STRUCTURE</div>
+                                        {% widthratio bd.structure 1 100 as stp %}
+                                        <div class="progress" style="height:6px; margin:4px 0;"><div class="progress-bar" style="width: {{ stp }}%; background:#8b5cf6;"></div></div>
+                                        <div style="font-size:13px; font-weight:600;">{{ stp }}%</div>
+                                        <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">D{{ bd.structure_components.definition }} E{{ bd.structure_components.example }} T{{ bd.structure_components.tradeoff }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div style="text-align:center; padding:8px; background:#fff; border-radius:6px;">
+                                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">CLARITY</div>
+                                        {% widthratio bd.clarity 1 100 as clp %}
+                                        <div class="progress" style="height:6px; margin:4px 0;"><div class="progress-bar" style="width: {{ clp }}%; background:#06b6d4;"></div></div>
+                                        <div style="font-size:13px; font-weight:600;">{{ clp }}%</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div style="text-align:center; padding:8px; background:#fff; border-radius:6px;">
+                                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">DEPTH</div>
+                                        {% widthratio bd.depth 1 100 as dep %}
+                                        <div class="progress" style="height:6px; margin:4px 0;"><div class="progress-bar" style="width: {{ dep }}%; background:#10b981;"></div></div>
+                                        <div style="font-size:13px; font-weight:600;">{{ dep }}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endwith %}
+                        </div>
+                        {% endif %}
+
+                        {% if answer_data.keywords %}
+                        <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border-color);">
+                            <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px;">KEY CONCEPTS</div>
+                            <div>
+                                {% for kw in answer_data.keywords %}
+                                    <span class="badge bg-secondary" style="margin-right:4px; margin-bottom:4px; font-weight:500;">{{ kw }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% if answer_data.keywords %}
-                    <div class="mt-2">
-                        <span class="text-muted" style="font-size:13px;">Key concepts:</span>
-                        {% for kw in answer_data.keywords %}
-                            <span class="badge bg-secondary me-1">{{ kw }}</span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
                 </div>
             {% endfor %}
 
-            <div class="text-center mt-3">
-                <a href="{% url 'interview_dashboard' %}" class="btn btn-outline-primary me-2">Back to Dashboard</a>
-                <a href="{% url 'start_interview' %}" class="btn btn-primary">Take Another Interview</a>
+            <div style="text-align:center; margin-top:24px; padding-top:24px; border-top:1px solid var(--border-color);">
+                <a href="{% url 'interview_dashboard' %}" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-house"></i> Back to Dashboard
+                </a>
+                <a href="{% url 'start_interview' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-repeat"></i> Take Another Interview
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function toggleAnswer(header) {
+    const content = header.nextElementSibling;
+    const icon = header.querySelector('.toggle-icon');
+    if (content.style.display === 'none' || !content.style.display) {
+        content.style.display = 'block';
+        icon.style.transform = 'rotate(90deg)';
+    } else {
+        content.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function toggleAllAnswers() {
+    const contents = document.querySelectorAll('.answer-content');
+    const icons = document.querySelectorAll('.toggle-icon');
+    const btn = document.getElementById('toggleBtn');
+    const allExpanded = Array.from(contents).every(c => c.style.display === 'block');
+    
+    contents.forEach((content, idx) => {
+        content.style.display = allExpanded ? 'none' : 'block';
+        icons[idx].style.transform = allExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
+    });
+    
+    btn.innerHTML = allExpanded 
+        ? '<i class="bi bi-chevron-down"></i> Expand All' 
+        : '<i class="bi bi-chevron-up"></i> Collapse All';
+}
+</script>
 {% endblock %}

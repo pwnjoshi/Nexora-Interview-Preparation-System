@@ -94,7 +94,6 @@ def dashboard(request):
         # Calculate statistics
         total_interviews = sessions.count()
         avg_score = 0
-        confidence_level = 0
         technical_accuracy = 0
         
         insights = []
@@ -105,11 +104,10 @@ def dashboard(request):
             total_score_sum = sum(session.score for session in sessions)
             avg_score = (total_score_sum / total_interviews) * 100
             
-            # Confidence level based on trend (simple: recent 3 vs overall)
+            # Recent sessions for insights (recent 3 vs overall)
             recent_sessions = list(sessions[:3])
             if recent_sessions:
                 recent_avg = sum(s.score for s in recent_sessions) / len(recent_sessions)
-                confidence_level = min(recent_avg * 100, 100)
                 overall_avg = (total_score_sum / total_interviews)
                 # Insight 1: Improvement trend
                 if recent_avg > overall_avg + 0.03:  # >3 pts improvement
@@ -151,11 +149,22 @@ def dashboard(request):
                             'tone': 'warning',
                             'text': "Focus on core keywords in answers. Mention definitions and key trade-offs."
                         })
-            
-            # Technical accuracy: percentage of sessions with score > 0.7
-            passing_sessions = [s for s in sessions if s.score >= 0.7]
-            technical_accuracy = (len(passing_sessions) / total_interviews) * 100
+        
+        # Technical accuracy: average keyword match across all individual answers
+        # More granular than session averages - reflects actual technical correctness
+        all_answer_scores = []
+        for session in sessions:
+            if isinstance(session.answers, dict):
+                for answer_meta in session.answers.values():
+                    try:
+                        score = float(answer_meta.get('score', 0))
+                        all_answer_scores.append(score)
+                    except Exception:
+                        continue
+        
+        technical_accuracy = (sum(all_answer_scores) / len(all_answer_scores)) * 100 if all_answer_scores else 0
 
+        if total_interviews > 0:
             # Build improvement-over-time arrays from last 8 sessions (chronological)
             last8 = list(sessions[:8])
             for s in reversed(last8):
@@ -179,18 +188,53 @@ def dashboard(request):
             # Parse first degree mentioned
             education_level = latest_resume.education.split('\n')[0] if latest_resume.education else "N/A"
 
-        # Build radar data from resume skill categories (top 6 categories by count)
+        # Build radar data: proficiency per skill category (based on interview performance)
         radar_labels = []
         radar_values = []
         if latest_resume and isinstance(latest_resume.skill_categories, dict) and latest_resume.skill_categories:
-            items = []
-            for cat, skills in latest_resume.skill_categories.items():
-                cnt = len(skills) if isinstance(skills, list) else 0
-                items.append((cat, cnt))
-            items.sort(key=lambda x: x[1], reverse=True)
-            top = items[:6]
-            radar_labels = [c for c, _ in top]
-            radar_values = [v for _, v in top]
+            # Build a map of skill -> category
+            skill_to_category = {}
+            for cat, skills_list in latest_resume.skill_categories.items():
+                if isinstance(skills_list, list):
+                    for skill in skills_list:
+                        skill_to_category[skill.lower().strip()] = cat
+            
+            # Aggregate scores by category from recent sessions
+            from collections import defaultdict
+            category_scores = defaultdict(list)
+            for session in sessions[:10]:  # Last 10 sessions
+                if not isinstance(session.answers, dict):
+                    continue
+                for answer_meta in session.answers.values():
+                    try:
+                        score = float(answer_meta.get('score', 0))
+                    except Exception:
+                        score = 0.0
+                    keywords = answer_meta.get('keywords', [])
+                    if keywords:
+                        for kw in keywords:
+                            kw_clean = kw.lower().strip()
+                            if kw_clean in skill_to_category:
+                                category_scores[skill_to_category[kw_clean]].append(score)
+            
+            # Calculate average proficiency per category
+            category_proficiency = []
+            for cat, scores in category_scores.items():
+                avg = (sum(scores) / len(scores)) * 100 if scores else 0
+                category_proficiency.append((cat, round(avg, 1), len(scores)))
+            
+            # Only show categories when we have interview-based scores
+            if category_proficiency:
+                # Sort by proficiency and pick top 6
+                category_proficiency.sort(key=lambda x: x[1], reverse=True)
+                top = category_proficiency[:6]
+                radar_labels = [c for c, _, _ in top]
+                radar_values = [v for _, v, _ in top]
+                # Clamp values defensively to 0–100
+                try:
+                    radar_values = [max(0, min(100, float(v))) for v in radar_values]
+                except Exception:
+                    radar_values = [0 for _ in radar_values]
 
         chart_payload = {
             'labels': chart_labels,
@@ -207,8 +251,7 @@ def dashboard(request):
             'stats': {
                 'total_interviews': total_interviews,
                 'avg_score': round(avg_score, 1),
-                'avg_feedback_score': round(avg_score / 20, 1),  # Convert to /5 scale
-                'confidence_level': round(confidence_level, 0),
+                'avg_feedback_score': round((avg_score / 100) * 5, 1),  # Convert 0-100% to 0-5 scale
                 'technical_accuracy': round(technical_accuracy, 0),
                 'experience_years': experience_years,
                 'education_level': education_level,
@@ -557,7 +600,33 @@ def start_interview_view(request):
     skills = latest_resume.skills if isinstance(latest_resume.skills, list) else []
     current_level = getattr(profile, 'current_level', 'beginner')
 
-    # 3 per level (beginner/intermediate/hard) -> total 9
+    # Default to adaptive mode unless explicitly forced to fixed via query param
+    if (request.GET.get('mode') or '').lower() != 'fixed':
+        target_total = 9
+        answered = []
+        # Get first adaptive question
+        try:
+            next_q = get_adaptive_questions(skills, answered, target_total=target_total, base_level=current_level)
+        except Exception:
+            next_q = None
+        if not next_q:
+            messages.error(request, 'No questions available for adaptive mode. Please try fixed mode.')
+            return redirect('interview_dashboard')
+
+        # Initialize adaptive interview session state
+        request.session['interview_mode'] = 'adaptive'
+        request.session['skills'] = skills
+        request.session['interview_level'] = current_level
+        request.session['target_total'] = target_total
+        request.session['answered'] = answered
+        request.session['current_question'] = next_q
+        request.session['current_question_index'] = 0
+        request.session['scored_answers'] = {}
+        # Show instructions screen before first question
+        request.session['instructions_pending'] = True
+        return redirect('interview_instructions')
+
+    # Fixed mode: 3 per level (beginner/intermediate/hard) -> total 9
     questions = get_fixed_interview_questions(skills, counts={"beginner":3,"intermediate":3,"hard":3}, total=9)
 
     if not questions:
@@ -570,10 +639,155 @@ def start_interview_view(request):
     request.session['user_answers'] = {}
     request.session['interview_level'] = current_level
 
-    return redirect('interview_question')
+    # Show instructions screen before first question
+    request.session['instructions_pending'] = True
+    return redirect('interview_instructions')
+
+
+@login_required(login_url='/login/')
+def interview_instructions_view(request):
+    """Pre-interview instructions and guidelines screen shown once per session."""
+    # Ensure a session is prepared
+    pending = request.session.get('instructions_pending', False)
+    if not pending:
+        return redirect('interview_dashboard')
+
+    mode = request.session.get('interview_mode', 'fixed')
+    total_questions = int(request.session.get('target_total') or len(request.session.get('interview_questions') or []) or 9)
+    level = request.session.get('interview_level', 'beginner')
+
+    if request.method == 'POST':
+        request.session['instructions_pending'] = False
+        return redirect('interview_question')
+
+    context = {
+        'interview_mode': mode,
+        'total_questions': total_questions,
+        'current_level': level,
+    }
+    return render(request, 'interview/instructions.html', context)
 
 @login_required(login_url='/login/')
 def interview_question_view(request):
+    # Ensure instructions have been acknowledged for a new session
+    if request.session.get('instructions_pending'):
+        return redirect('interview_instructions')
+
+    mode = request.session.get('interview_mode', 'fixed')
+
+    # Adaptive mode branch
+    if mode == 'adaptive':
+        skills = request.session.get('skills', [])
+        base_level = request.session.get('interview_level', 'beginner')
+        target_total = int(request.session.get('target_total', 9))
+        answered = request.session.get('answered', [])
+        current_q = request.session.get('current_question')
+
+        # If no current question (e.g., direct navigation), fetch one
+        if not current_q:
+            current_q = get_adaptive_questions(skills, answered, target_total=target_total, base_level=base_level)
+            if not current_q:
+                return redirect('interview_dashboard')
+            request.session['current_question'] = current_q
+
+        # Handle submission
+        if request.method == 'POST':
+            answer_text = request.POST.get('answer', '')
+            expected_keywords = current_q.get('keywords', [])
+            try:
+                score = score_single_answer(answer_text, expected_keywords)
+            except Exception:
+                score = 0.0
+
+            # Update answered list and scored answers map
+            answered.append({
+                'question_text': current_q.get('question_text',''),
+                'level': current_q.get('level','beginner'),
+                'score': round(score, 2),
+            })
+            request.session['answered'] = answered
+
+            scored_answers = request.session.get('scored_answers', {})
+            q_text = current_q.get('question_text','')
+            scored_answers[q_text] = {
+                'answer': answer_text,
+                'score': round(score, 2),
+                'keywords': expected_keywords,
+                'level': current_q.get('level','beginner')
+            }
+            request.session['scored_answers'] = scored_answers
+
+            # Progress index
+            request.session['current_question_index'] = len(answered)
+
+            # Check completion
+            if len(answered) >= target_total:
+                latest_resume = Resume.objects.filter(username=request.user.username).order_by('-uploaded_at').first()
+                profile = get_single_profile(request.user)
+
+                total_score = sum(a.get('score', 0) for a in answered)
+                avg_score = total_score / len(answered) if answered else 0
+
+                from .utils import evaluate_interview_answers
+                user_answers_for_eval = {qt: meta['answer'] for qt, meta in scored_answers.items()}
+                try:
+                    eval_results = evaluate_interview_answers(
+                        user_id=profile.unique_user_id,
+                        field='general',
+                        current_level=base_level,
+                        user_answers=user_answers_for_eval
+                    )
+                except Exception as e:
+                    print(f"Evaluation error: {e}")
+                    eval_results = None
+
+                from .models import InterviewSession as InterviewSessionModel
+                from django.utils.crypto import get_random_string
+                session_id = get_random_string(12)
+                interview_session = InterviewSessionModel(
+                    session_id=session_id,
+                    username=request.user.username,
+                    skills=latest_resume.skills if latest_resume else [],
+                    answers=scored_answers,
+                    score=round(avg_score, 2),
+                    current_level=base_level,
+                    recommended_next_level=eval_results['recommended_next_level'] if eval_results else base_level,
+                    evaluation_flag=eval_results['overall_flag'] if eval_results else 'Same',
+                    flag_records=eval_results['flag_record'] if eval_results else {}
+                )
+                interview_session.save()
+
+                if eval_results and eval_results['recommended_next_level'] != base_level:
+                    profile.current_level = eval_results['recommended_next_level']
+                    profile.save()
+
+                messages.success(request, f"Interview completed! Your score: {round(avg_score*100,1)}%")
+
+                # Clear session keys
+                for key in ['interview_mode','skills','target_total','answered','current_question','current_question_index','scored_answers','interview_level']:
+                    if key in request.session:
+                        del request.session[key]
+                return redirect('interview_results', session_id=session_id)
+
+            # Fetch next question
+            next_q = get_adaptive_questions(skills, answered, target_total=target_total, base_level=base_level)
+            request.session['current_question'] = next_q
+            return redirect('interview_question')
+
+        # GET render for adaptive
+        q_text = current_q.get('question_text','')
+        q_level = current_q.get('level','beginner')
+        question_number = len(answered) + 1
+        context = {
+            'question': {'text': q_text},
+            'question_number': question_number,
+            'total_questions': target_total,
+            'current_level': q_level,
+            'interview_mode': 'adaptive',
+        }
+        return render(request, 'interview/question_page.html', context)
+
+    # Fixed mode (legacy path)
     questions = request.session.get('interview_questions', [])
     current_index = request.session.get('current_question_index', 0)
     user_answers = request.session.get('user_answers', {})
@@ -600,12 +814,14 @@ def interview_question_view(request):
                 q_text = q['question_text']
                 ans_text = user_answers.get(q_text, '')
                 keywords = q.get('keywords', [])
-                score = keyword_match_score(ans_text, keywords)
+                # Use improved composite scoring (via utils.score_single_answer)
+                score = score_single_answer(ans_text, keywords)
                 total_score += score
                 scored_answers[q_text] = {
                     'answer': ans_text,
                     'score': round(score,2),
-                    'keywords': keywords
+                    'keywords': keywords,
+                    'level': q.get('level','beginner')
                 }
             avg_score = total_score / len(questions) if questions else 0
 
@@ -657,7 +873,8 @@ def interview_question_view(request):
         'question': {'text': current_question.get('question_text','')},
         'question_number': current_index + 1,
         'total_questions': len(questions),
-        'current_level': interview_level
+        'current_level': interview_level,
+        'interview_mode': 'fixed',
     }
     return render(request, 'interview/question_page.html', context)
 
@@ -685,19 +902,54 @@ def results_view(request, session_id):
     # Calculate detailed scores
     score_details = calculate_interview_score(session_id)
 
-    # Build lightweight analytics from answers
+    # Compute marks and performance level using answer_evaluation.evaluate_interview_complete
     answers = session_data['answers'] if isinstance(session_data.get('answers'), dict) else {}
+    try:
+        from .answer_evaluation import evaluate_interview_complete
+        user_answers_map = {qt: (meta.get('answer') if isinstance(meta, dict) else '') for qt, meta in answers.items()}
+        question_levels = {qt: (meta.get('level','beginner') if isinstance(meta, dict) else 'beginner') for qt, meta in answers.items()}
+        question_keywords = {qt: (meta.get('keywords', []) if isinstance(meta, dict) else []) for qt, meta in answers.items()}
+        eval_summary = evaluate_interview_complete(user_answers_map, question_levels, question_keywords)
+    except Exception as e:
+        print(f"Eval complete error: {e}")
+        eval_summary = None
+
+    # Build lightweight analytics from answers + composite breakdowns
     total_q = len(answers)
     strong = mid = weak = 0
     total_score = 0.0
     from collections import Counter
     kw_counter = Counter()
     weak_kw_counter = Counter()
-    for meta in answers.values():
+
+    # recompute composite breakdown per answer for transparency
+    from .answer_evaluation import composite_breakdown
+    cov_sum = struct_sum = clar_sum = depth_sum = 0.0
+
+    for q_text, meta in answers.items():
         try:
             s = float(meta.get('score', 0))
         except Exception:
             s = 0.0
+        # compute breakdown based on saved level/keywords
+        level = (meta.get('level') or 'beginner') if isinstance(meta, dict) else 'beginner'
+        kws = (meta.get('keywords') or []) if isinstance(meta, dict) else []
+        ans_text = (meta.get('answer') or '') if isinstance(meta, dict) else ''
+        # flag if answer just echoes the question
+        try:
+            import re
+            norm_q = re.sub(r"\W+", "", (q_text or '').lower())
+            norm_a = re.sub(r"\W+", "", (ans_text or '').lower())
+            meta['echo_answer'] = bool(norm_q and norm_q == norm_a)
+        except Exception:
+            meta['echo_answer'] = False
+        bd = composite_breakdown(ans_text, kws, level=level)
+        meta['breakdown'] = bd
+        cov_sum += bd['coverage']
+        struct_sum += bd['structure']
+        clar_sum += bd['clarity']
+        depth_sum += bd['depth']
+
         total_score += s
         if s >= 0.75:
             strong += 1
@@ -705,13 +957,20 @@ def results_view(request, session_id):
             mid += 1
         else:
             weak += 1
-        for kw in (meta.get('keywords') or []):
+        for kw in (kws or []):
             if kw:
                 kw_counter[kw] += 1
                 if s < 0.5:
                     weak_kw_counter[kw] += 1
 
     avg_pct = round((total_score / total_q) * 100, 1) if total_q else 0
+    breakdown_overall = {
+        'coverage': round((cov_sum / total_q) * 100, 1) if total_q else 0,
+        'structure': round((struct_sum / total_q) * 100, 1) if total_q else 0,
+        'clarity': round((clar_sum / total_q) * 100, 1) if total_q else 0,
+        'depth': round((depth_sum / total_q) * 100, 1) if total_q else 0,
+    }
+
     analytics = {
         'total': total_q,
         'avg_pct': avg_pct,
@@ -720,7 +979,11 @@ def results_view(request, session_id):
         'weak': weak,
         'top_keywords': [k for k, _ in kw_counter.most_common(6)],
         'weak_keywords': [k for k, _ in weak_kw_counter.most_common(6)],
+        'breakdown_overall': breakdown_overall,
     }
+
+    # de-duplicate and limit skills shown
+    skills_list = list(dict.fromkeys(session_data.get('skills') or []))[:12]
 
     context = {
         'session': {
@@ -731,9 +994,10 @@ def results_view(request, session_id):
             'evaluation_flag': interview_session.evaluation_flag if interview_session else None,
         },
         'answers': answers,
-        'skills': session_data['skills'],
+        'skills': skills_list,
         'score_details': score_details,
         'analytics': analytics,
+        'marks': eval_summary if eval_summary else None,
     }
     
     return render(request, 'interview/results_page.html', context)
