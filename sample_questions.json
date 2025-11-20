@@ -1,0 +1,525 @@
+[
+    {
+        "question": "What is Machine Learning?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["machine learning", "AI subset", "algorithms", "data", "patterns", "predictions"],
+            "tokens": ["machine", "learning", "is", "a", "subset", "of", "AI", "that", "enables", "systems", "to", "learn", "from", "data", "and", "improve", "their", "performance", "without", "explicit", "programming"],
+            "text": "Machine Learning is a subset of AI that enables systems to learn from data and improve their performance without explicit programming."
+        }
+    },
+    {
+        "question": "Explain the difference between supervised and unsupervised learning.",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["supervised learning", "labeled data", "unsupervised learning", "unlabeled data", "clustering", "classification"],
+            "tokens": ["supervised", "learning", "uses", "labeled", "training", "data", "where", "the", "correct", "answers", "are", "known", "while", "unsupervised", "learning", "works", "with", "unlabeled", "data", "to", "find", "patterns", "and", "structures"],
+            "text": "Supervised learning uses labeled training data where the correct answers are known, while unsupervised learning works with unlabeled data to find patterns and structures."
+        }
+    },
+    {
+        "question": "What is overfitting and how can it be prevented?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["overfitting", "training data", "generalization", "regularization", "cross-validation", "dropout"],
+            "tokens": ["overfitting", "occurs", "when", "a", "model", "learns", "the", "training", "data", "too", "well", "including", "noise", "reducing", "its", "ability", "to", "generalize", "prevention", "techniques", "include", "regularization", "cross", "validation", "and", "dropout"],
+            "text": "Overfitting occurs when a model learns the training data too well, including noise, reducing its ability to generalize. Prevention techniques include regularization, cross-validation, and dropout."
+        }
+    },
+    {
+        "question": "Explain the bias-variance tradeoff in machine learning.",
+        "level": "hard",
+        "answer": {
+            "keywords": ["bias", "variance", "tradeoff", "underfitting", "overfitting", "model complexity", "generalization error"],
+            "tokens": ["the", "bias", "variance", "tradeoff", "describes", "the", "balance", "between", "a", "model's", "ability", "to", "minimize", "bias", "error", "from", "wrong", "assumptions", "and", "variance", "error", "from", "sensitivity", "to", "training", "data", "fluctuations"],
+            "text": "The bias-variance tradeoff describes the balance between a model's ability to minimize bias (error from wrong assumptions) and variance (error from sensitivity to training data fluctuations)."
+        }
+    },
+    {
+        "question": "What is a neural network?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["neural network", "artificial neurons", "layers", "weights", "activation functions"],
+            "tokens": ["a", "neural", "network", "is", "a", "computational", "model", "inspired", "by", "biological", "neurons", "consisting", "of", "interconnected", "layers", "of", "artificial", "neurons", "that", "process", "information"],
+            "text": "A neural network is a computational model inspired by biological neurons, consisting of interconnected layers of artificial neurons that process information through weighted connections and activation functions."
+        }
+        
+    },
+    {
+        "question": "Define Regression and Classification.",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["regression", "continuous output", "classification", "discrete output", "prediction tasks"],
+            "tokens": ["regression", "is", "a", "type", "of", "supervised", "learning", "used", "to", "predict", "a", "continuous", "output", "e", "g", "price", "while", "classification", "predicts", "a", "discrete", "label", "e", "g", "spam", "not", "spam"],
+            "text": "Regression predicts a continuous output value (e.g., house price), while Classification predicts a discrete label or category (e.g., 'Spam' or 'Not Spam'). Both are supervised learning tasks."
+        }
+    },
+    {
+        "question": "What are Features in Machine Learning?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["features", "attributes", "variables", "input data", "prediction"],
+            "tokens": ["features", "are", "the", "individual", "measurable", "properties", "or", "attributes", "of", "the", "data", "that", "are", "used", "as", "input", "for", "a", "model", "to", "make", "a", "prediction"],
+            "text": "Features are the individual, measurable properties or attributes (variables) of the data that are used as input for a model to make a prediction."
+        }
+    },
+    {
+        "question": "What is the purpose of a Loss Function?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["loss function", "cost function", "error", "minimization", "optimization", "model performance"],
+            "tokens": ["the", "loss", "function", "quantifies", "the", "difference", "between", "the", "predicted", "output", "of", "a", "model", "and", "the", "true", "target", "value", "the", "goal", "during", "training", "is", "to", "minimize", "this", "loss"],
+            "text": "The loss function (or cost function) quantifies the difference between the predicted output of a model and the true target value. The goal during training is to minimize this loss."
+        }
+    },
+    {
+        "question": "What is Gradient Descent?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["gradient descent", "optimization algorithm", "weights", "cost function", "learning rate"],
+            "tokens": ["gradient", "descent", "is", "an", "optimization", "algorithm", "used", "to", "minimize", "the", "cost", "function", "by", "iteratively", "adjusting", "the", "model's", "parameters", "weights", "in", "the", "direction", "of", "steepest", "descent"],
+            "text": "Gradient Descent is an optimization algorithm used to minimize the cost function by iteratively adjusting the model's parameters (weights) in the direction of steepest descent."
+        }
+    },
+    {
+        "question": "Differentiate between Batch, Stochastic, and Mini-Batch Gradient Descent.",
+        "level": "hard",
+        "answer": {
+            "keywords": ["batch GD", "stochastic GD", "mini-batch GD", "data size", "convergence", "computation"],
+            "tokens": ["batch", "gd", "uses", "the", "entire", "dataset", "for", "one", "update", "slower", "stochastic", "gd", "uses", "only", "one", "sample", "per", "update", "noisy", "and", "mini", "batch", "gd", "uses", "a", "small", "subset", "of", "data", "offering", "a", "balance", "of", "speed", "and", "stability"],
+            "text": "Batch GD uses the entire dataset for one update (slower). Stochastic GD uses one sample per update (noisy). Mini-Batch GD uses a small subset of data, offering a balance of speed and stability."
+        }
+    },
+    {
+        "question": "What is Regularization in Machine Learning?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["regularization", "overfitting", "penalty", "L1", "L2", "weights", "model complexity"],
+            "tokens": ["regularization", "is", "a", "technique", "used", "to", "prevent", "overfitting", "by", "adding", "a", "penalty", "term", "to", "the", "loss", "function", "based", "on", "the", "magnitude", "of", "the", "model's", "weights", "common", "types", "are", "l1", "lasso", "and", "l2", "ridge"],
+            "text": "Regularization is a technique to prevent overfitting by adding a penalty term (e.g., L1 or L2) to the loss function, based on the magnitude of the model's weights, thus reducing model complexity."
+        }
+    },
+    {
+        "question": "What is Cross-Validation and why is it used?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["cross-validation", "k-fold", "generalization", "model evaluation", "dataset split"],
+            "tokens": ["cross", "validation", "is", "a", "resampling", "procedure", "used", "to", "evaluate", "a", "model's", "performance", "on", "an", "independent", "dataset", "to", "estimate", "how", "well", "it", "will", "generalize", "to", "new", "data", "k", "fold", "is", "a", "common", "method"],
+            "text": "Cross-Validation is a resampling procedure (like K-Fold) used to evaluate a model's performance and estimate how well it will generalize to new, unseen data, preventing reliance on a single train-test split."
+        }
+    },
+    {
+        "question": "Explain the concept of an Activation Function in a Neural Network.",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["activation function", "non-linearity", "neuron output", "ReLU", "Sigmoid", "Tahn"],
+            "tokens": ["an", "activation", "function", "determines", "the", "output", "of", "a", "neuron", "and", "introduces", "non", "linearity", "to", "the", "network", "allowing", "it", "to", "learn", "complex", "patterns", "common", "examples", "are", "relu", "sigmoid", "and", "tanh"],
+            "text": "An activation function determines the output of a neuron and introduces non-linearity to the network, allowing it to learn complex patterns. Common examples are ReLU, Sigmoid, and Tanh."
+        }
+    },
+    {
+        "question": "What is Feature Scaling and why is it necessary?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["feature scaling", "standardization", "normalization", "magnitude", "distance-based algorithms", "convergence"],
+            "tokens": ["feature", "scaling", "is", "a", "method", "to", "normalize", "the", "range", "of", "independent", "features", "or", "variables", "of", "data", "it", "is", "necessary", "to", "prevent", "features", "with", "larger", "magnitudes", "from", "dominating", "the", "learning", "process", "especially", "in", "distance", "based", "algorithms"],
+            "text": "Feature scaling is a method to normalize the range of independent features. It's necessary to prevent features with larger magnitudes from dominating the learning process, especially in distance-based algorithms like KNN or K-Means."
+        }
+    },
+    {
+        "question": "What is Reinforcement Learning (RL)?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["reinforcement learning", "agent", "environment", "rewards", "actions", "policy"],
+            "tokens": ["reinforcement", "learning", "is", "a", "type", "of", "machine", "learning", "where", "an", "agent", "learns", "to", "make", "decisions", "by", "interacting", "with", "an", "environment", "receiving", "rewards", "or", "penalties", "for", "its", "actions"],
+            "text": "Reinforcement Learning is where an agent learns to make decisions by interacting with an environment, receiving rewards or penalties for its actions to maximize cumulative reward."
+        }
+    },
+    {
+        "question": "What is K-Nearest Neighbors (KNN)?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["KNN", "non-parametric", "instance-based", "distance metric", "classification", "regression"],
+            "tokens": ["k", "nearest", "neighbors", "knn", "is", "a", "non", "parametric", "instance", "based", "learning", "algorithm", "it", "classifies", "a", "data", "point", "based", "on", "how", "its", "neighbors", "k", "are", "classified", "using", "a", "distance", "metric"],
+            "text": "K-Nearest Neighbors (KNN) is a non-parametric, instance-based learning algorithm that classifies a new data point based on the majority class of its 'k' nearest neighbors in the feature space."
+        }
+    },
+    {
+        "question": "What is Principal Component Analysis (PCA)?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["PCA", "dimensionality reduction", "unsupervised", "variance", "principal components", "feature extraction"],
+            "tokens": ["principal", "component", "analysis", "pca", "is", "an", "unsupervised", "dimensionality", "reduction", "technique", "that", "transforms", "high", "dimensional", "data", "into", "a", "smaller", "set", "of", "variables", "principal", "components", "while", "retaining", "most", "of", "the", "variance"],
+            "text": "Principal Component Analysis (PCA) is an unsupervised dimensionality reduction technique that transforms high-dimensional data into a smaller set of variables (Principal Components) while retaining most of the variance."
+        }
+    },
+    {
+        "question": "Explain the concept of Epoch, Batch Size, and Iteration.",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["epoch", "batch size", "iteration", "training process", "full dataset", "optimization"],
+            "tokens": ["an", "epoch", "is", "one", "full", "pass", "of", "the", "entire", "training", "dataset", "through", "the", "algorithm", "a", "batch", "size", "is", "the", "number", "of", "training", "examples", "in", "one", "forward", "backward", "pass", "and", "an", "iteration", "is", "the", "number", "of", "batches", "needed", "to", "complete", "one", "epoch"],
+            "text": "An **Epoch** is one full pass through the entire training dataset. **Batch Size** is the number of training examples used in one forward/backward pass. An **Iteration** is the number of batches needed to complete one epoch."
+        }
+    },
+    {
+        "question": "What is an Ensemble Method?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["ensemble method", "multiple models", "aggregation", "better performance", "bagging", "boosting"],
+            "tokens": ["an", "ensemble", "method", "is", "a", "technique", "that", "combines", "the", "predictions", "from", "multiple", "individual", "machine", "learning", "models", "to", "produce", "a", "more", "accurate", "and", "robust", "prediction", "than", "any", "single", "model", "popular", "methods", "include", "random", "forest", "and", "gradient", "boosting"],
+            "text": "An Ensemble Method is a technique that combines the predictions from multiple individual machine learning models to produce a more accurate and robust prediction. Bagging (like Random Forest) and Boosting (like XGBoost) are common types."
+        }
+    },
+    {
+        "question": "Explain Bagging and Boosting.",
+        "level": "hard",
+        "answer": {
+            "keywords": ["bagging", "boosting", "parallel", "sequential", "variance reduction", "bias reduction", "weak learners"],
+            "tokens": ["bagging", "bootstrap", "aggregation", "trains", "multiple", "models", "in", "parallel", "on", "different", "subsets", "of", "data", "reducing", "variance", "boosting", "trains", "models", "sequentially", "where", "each", "new", "model", "corrects", "errors", "of", "the", "previous", "one", "reducing", "bias", "and", "often", "using", "weak", "learners"],
+            "text": "**Bagging** (like Random Forest) trains models in parallel on subsets of data, primarily reducing variance. **Boosting** (like AdaBoost, XGBoost) trains models sequentially, where each new model corrects the errors of the previous one, primarily reducing bias."
+        }
+    },
+    {
+        "question": "What is the curse of dimensionality?",
+        "level": "hard",
+        "answer": {
+            "keywords": ["curse of dimensionality", "high-dimensional data", "sparsity", "distance metrics", "computational complexity", "data volume"],
+            "tokens": ["the", "curse", "of", "dimensionality", "refers", "to", "various", "problems", "that", "arise", "when", "working", "with", "data", "in", "high", "dimensional", "spaces", "as", "the", "number", "of", "features", "increases", "the", "data", "becomes", "extremely", "sparse", "making", "distance", "metrics", "less", "meaningful", "and", "increasing", "computational", "cost"],
+            "text": "The 'Curse of Dimensionality' refers to problems that arise in high-dimensional data, where the data becomes extremely sparse. This sparsity makes distance metrics less meaningful and significantly increases computational complexity."
+        }
+    },
+    {
+        "question": "How do you handle missing values in a dataset?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["missing values", "imputation", "mean", "median", "mode", "deletion", "advanced techniques"],
+            "tokens": ["missing", "values", "can", "be", "handled", "by", "deleting", "rows", "or", "columns", "with", "too", "many", "missing", "values", "or", "by", "imputation", "filling", "them", "in", "common", "imputation", "methods", "include", "using", "the", "mean", "median", "or", "mode", "for", "the", "feature", "or", "using", "advanced", "imputation", "models"],
+            "text": "Missing values can be handled by deleting rows/columns with excessive missing data, or by **imputation** (filling them in). Common imputation methods use the mean, median, or mode, or more advanced machine learning models."
+        }
+    },
+    {
+        "question": "What is the difference between Type I and Type II errors?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["Type I error", "false positive", "Type II error", "false negative", "confusion matrix", "hypothesis testing"],
+            "tokens": ["a", "type", "i", "error", "is", "a", "false", "positive", "where", "you", "incorrectly", "reject", "a", "true", "null", "hypothesis", "a", "type", "ii", "error", "is", "a", "false", "negative", "where", "you", "incorrectly", "fail", "to", "reject", "a", "false", "null", "hypothesis", "this", "is", "often", "explained", "using", "the", "confusion", "matrix"],
+            "text": "A **Type I Error** is a **False Positive** (rejecting a true null hypothesis). A **Type II Error** is a **False Negative** (failing to reject a false null hypothesis)."
+        }
+    },
+    {
+        "question": "Define Precision and Recall.",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["precision", "recall", "confusion matrix", "positive prediction", "actual positives", "evaluation metrics"],
+            "tokens": ["precision", "answers", "of", "all", "the", "positive", "predictions", "made", "how", "many", "were", "actually", "correct", "recall", "answers", "of", "all", "the", "actual", "positives", "in", "the", "data", "how", "many", "did", "the", "model", "correctly", "identify", "these", "are", "key", "classification", "metrics"],
+            "text": "**Precision** measures the ratio of correctly predicted positive observations to the total predicted positives. **Recall** (or Sensitivity) measures the ratio of correctly predicted positive observations to all observations in the actual class."
+        }
+    },
+    {
+        "question": "What is F1 Score?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["F1 Score", "harmonic mean", "precision", "recall", "imbalanced data", "evaluation metric"],
+            "tokens": ["the", "f1", "score", "is", "the", "harmonic", "mean", "of", "precision", "and", "recall", "it", "is", "particularly", "useful", "as", "a", "single", "metric", "when", "you", "have", "uneven", "class", "distribution", "imbalanced", "data", "as", "it", "punishes", "extreme", "values"],
+            "text": "The F1 Score is the **harmonic mean** of Precision and Recall. It is a single metric particularly useful when dealing with **imbalanced datasets**, as it balances both False Positives and False Negatives."
+        }
+    },
+    {
+        "question": "Explain Support Vector Machines (SVM).",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["SVM", "classification", "regression", "hyperplane", "margin", "support vectors", "kernel trick"],
+            "tokens": ["support", "vector", "machines", "svm", "is", "a", "supervised", "learning", "model", "used", "for", "classification", "and", "regression", "it", "works", "by", "finding", "the", "optimal", "hyperplane", "that", "maximally", "separates", "data", "points", "into", "classes", "with", "the", "largest", "margin", "the", "data", "points", "closest", "to", "the", "hyperplane", "are", "called", "support", "vectors"],
+            "text": "SVM is a supervised model that works by finding the optimal **hyperplane** that maximally separates data points into classes with the largest **margin**. The data points closest to the hyperplane are the **Support Vectors**."
+        }
+    },
+    {
+        "question": "What is the Kernel Trick in SVM?",
+        "level": "hard",
+        "answer": {
+            "keywords": ["kernel trick", "non-linear data", "higher dimension", "feature space", "computationally efficient"],
+            "tokens": ["the", "kernel", "trick", "is", "a", "technique", "used", "by", "svm", "to", "transform", "non", "linear", "separable", "input", "data", "into", "a", "higher", "dimensional", "feature", "space", "where", "it", "can", "be", "linearly", "separated", "without", "explicitly", "computing", "the", "coordinates", "in", "the", "new", "space", "making", "it", "computationally", "efficient"],
+            "text": "The **Kernel Trick** is a technique that transforms non-linear separable input data into a higher-dimensional feature space where it can be linearly separated, without explicitly computing the coordinates, making it computationally efficient."
+        }
+    },
+    {
+        "question": "What is Clustering and name two popular algorithms.",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["clustering", "unsupervised learning", "groups", "similarity", "K-Means", "DBSCAN"],
+            "tokens": ["clustering", "is", "an", "unsupervised", "learning", "task", "of", "grouping", "a", "set", "of", "data", "points", "in", "such", "a", "way", "that", "data", "points", "in", "the", "same", "group", "cluster", "are", "more", "similar", "to", "each", "other", "than", "to", "those", "in", "other", "groups", "two", "popular", "algorithms", "are", "k", "means", "and", "dbscan"],
+            "text": "Clustering is an **unsupervised** learning task of grouping data points so that points in the same group (cluster) are more similar to each other. Popular algorithms include **K-Means** and **DBSCAN**."
+        }
+    },
+    {
+        "question": "Explain how the K-Means algorithm works.",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["K-Means", "centroids", "iteration", "Euclidean distance", "unsupervised", "cluster assignment"],
+            "tokens": ["k", "means", "is", "an", "iterative", "clustering", "algorithm", "that", "aims", "to", "partition", "n", "data", "points", "into", "k", "pre", "defined", "clusters", "it", "works", "by", "randomly", "assigning", "k", "centroids", "and", "then", "iteratively", "assigning", "data", "points", "to", "the", "nearest", "centroid", "and", "recalculating", "the", "centroid", "as", "the", "mean", "of", "the", "cluster"],
+            "text": "K-Means iteratively partitions data into *k* clusters. It randomly initializes *k* centroids, assigns each data point to the nearest centroid, and then recalculates the centroid as the mean of the cluster points. This process repeats until the centroids stabilize."
+        }
+    },
+    {
+        "question": "What is the vanishing gradient problem?",
+        "level": "hard",
+        "answer": {
+            "keywords": ["vanishing gradient", "deep learning", "backpropagation", "gradient magnitude", "Sigmoid", "long-term dependencies"],
+            "tokens": ["the", "vanishing", "gradient", "problem", "occurs", "in", "deep", "neural", "networks", "during", "backpropagation", "when", "the", "gradients", "become", "extremely", "small", "as", "they", "propagate", "backward", "to", "the", "earlier", "layers", "this", "causes", "the", "weights", "in", "the", "initial", "layers", "to", "update", "very", "slowly", "or", "not", "at", "all", "making", "learning", "ineffective", "especially", "in", "rnns"],
+            "text": "The **vanishing gradient problem** occurs in deep neural networks during backpropagation when the gradients become extremely small as they propagate backward to the initial layers. This causes the weights in early layers to update very slowly, making learning ineffective."
+        }
+    },
+    {
+        "question": "How does the ReLU activation function help solve the vanishing gradient problem?",
+        "level": "hard",
+        "answer": {
+            "keywords": ["ReLU", "Rectified Linear Unit", "vanishing gradient", "constant gradient", "non-saturation", "sparsity"],
+            "tokens": ["the", "relu", "activation", "function", "rectified", "linear", "unit", "outputs", "the", "input", "directly", "if", "it", "is", "positive", "and", "zero", "otherwise", "for", "positive", "inputs", "its", "gradient", "is", "always", "1", "which", "allows", "gradients", "to", "flow", "backwards", "without", "shrinking", "this", "non", "saturation", "helps", "to", "alleviate", "the", "vanishing", "gradient", "problem"],
+            "text": "The ReLU (Rectified Linear Unit) function outputs a constant gradient (1) for positive inputs. This non-saturation prevents the gradient from shrinking as it backpropagates through many layers, thus alleviating the vanishing gradient problem."
+        }
+    },
+    {
+        "question": "What is a Decision Tree?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["decision tree", "non-parametric", "splits", "nodes", "entropy", "information gain", "classification", "regression"],
+            "tokens": ["a", "decision", "tree", "is", "a", "non", "parametric", "supervised", "learning", "algorithm", "used", "for", "both", "classification", "and", "regression", "it", "uses", "a", "tree", "like", "model", "of", "decisions", "where", "each", "internal", "node", "represents", "a", "test", "on", "an", "attribute", "each", "branch", "represents", "the", "outcome", "of", "the", "test", "and", "each", "leaf", "node", "represents", "a", "class", "label"],
+            "text": "A Decision Tree is a non-parametric supervised learning algorithm that uses a tree-like structure of decisions (splits) based on features to arrive at a predicted outcome (class label or value)."
+        }
+    },
+    {
+        "question": "What metrics are used to decide the splits in a Decision Tree?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["splits", "decision tree", "Information Gain", "Entropy", "Gini Impurity", "classification", "regression"],
+            "tokens": ["in", "a", "decision", "tree", "the", "splits", "are", "decided", "using", "metrics", "that", "measure", "the", "homogeneity", "or", "purity", "of", "the", "resulting", "nodes", "for", "classification", "common", "metrics", "include", "information", "gain", "based", "on", "entropy", "and", "gini", "impurity", "for", "regression", "metrics", "like", "variance", "reduction", "are", "used"],
+            "text": "For classification, the splits are decided using metrics like **Information Gain** (based on Entropy) or **Gini Impurity**, which measure the purity of the resulting nodes. For regression, metrics like variance reduction are used."
+        }
+    },
+    {
+        "question": "What is a Random Forest?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["Random Forest", "ensemble method", "bagging", "decision trees", "overfitting reduction", "robustness"],
+            "tokens": ["random", "forest", "is", "an", "ensemble", "learning", "method", "based", "on", "bagging", "it", "constructs", "a", "multitude", "of", "decision", "trees", "at", "training", "time", "and", "outputs", "the", "class", "that", "is", "the", "mode", "of", "the", "classes", "classification", "or", "mean", "prediction", "regression", "of", "the", "individual", "trees", "this", "reduces", "overfitting", "and", "improves", "accuracy"],
+            "text": "Random Forest is an ensemble learning method based on **Bagging**. It constructs a multitude of decision trees at training time and outputs the mode (classification) or mean (regression) prediction of the individual trees, significantly reducing overfitting and improving accuracy."
+        }
+    },
+    {
+        "question": "What are Hyperparameters?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["hyperparameters", "model configuration", "external setting", "optimization", "learning rate", "k-value"],
+            "tokens": ["hyperparameters", "are", "external", "configuration", "settings", "that", "are", "set", "prior", "to", "the", "training", "process", "and", "whose", "values", "cannot", "be", "estimated", "from", "the", "data", "examples", "include", "the", "learning", "rate", "the", "number", "of", "trees", "in", "a", "random", "forest", "or", "the", "number", "of", "clusters", "k", "in", "k", "means"],
+            "text": "Hyperparameters are external configuration settings that are set **prior** to the training process and whose values cannot be estimated from the data. Examples include the learning rate, the number of layers, or the k-value in KNN."
+        }
+    },
+    {
+        "question": "Name and describe two methods for Hyperparameter Tuning.",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["hyperparameter tuning", "Grid Search", "Random Search", "optimization", "model performance"],
+            "tokens": ["two", "common", "methods", "are", "grid", "search", "and", "random", "search", "grid", "search", "exhaustively", "tries", "every", "combination", "of", "a", "defined", "subset", "of", "hyperparameters", "random", "search", "randomly", "samples", "from", "the", "hyperparameter", "space", "which", "is", "often", "more", "computationally", "efficient", "for", "high", "dimensional", "spaces"],
+            "text": "**Grid Search** exhaustively tries every combination of a defined subset of hyperparameters. **Random Search** randomly samples from the hyperparameter space, which is often more computationally efficient for high-dimensional spaces."
+        }
+    },
+    {
+        "question": "What is Multicollinearity and how does it affect a model?",
+        "level": "hard",
+        "answer": {
+            "keywords": ["multicollinearity", "independent variables", "correlation", "regression coefficients", "instability", "interpretability"],
+            "tokens": ["multicollinearity", "occurs", "when", "two", "or", "more", "independent", "variables", "in", "a", "multiple", "regression", "model", "are", "highly", "correlated", "with", "each", "other", "this", "can", "lead", "to", "unstable", "or", "inaccurate", "estimates", "of", "the", "regression", "coefficients", "making", "model", "interpretation", "difficult", "it", "does", "not", "always", "affect", "prediction", "accuracy", "though"],
+            "text": "**Multicollinearity** occurs when two or more independent variables in a regression model are highly correlated. This can lead to unstable or inaccurate estimates of the regression coefficients, making model interpretation difficult."
+        }
+    },
+    {
+        "question": "What is Logistic Regression?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["logistic regression", "classification", "sigmoid function", "probability", "linear model"],
+            "tokens": ["logistic", "regression", "is", "a", "linear", "model", "used", "for", "binary", "classification", "it", "uses", "the", "sigmoid", "activation", "function", "to", "map", "predictions", "to", "a", "probability", "value", "between", "0", "and", "1", "which", "is", "then", "thresholded", "to", "output", "a", "class", "label"],
+            "text": "Logistic Regression is a linear model used for **classification** (binary or multi-class). It uses the **Sigmoid function** to map the prediction to a probability value between 0 and 1, which is then thresholded to output a class label."
+        }
+    },
+    {
+        "question": "Explain the concept of 'Inductive Bias'.",
+        "level": "hard",
+        "answer": {
+            "keywords": ["inductive bias", "assumptions", "generalization", "prior knowledge", "model choice", "hypothesis space"],
+            "tokens": ["inductive", "bias", "is", "the", "set", "of", "assumptions", "that", "a", "learning", "algorithm", "uses", "to", "make", "predictions", "on", "new", "examples", "that", "it", "has", "not", "encountered", "during", "training", "it", "is", "the", "necessary", "non", "data", "driven", "logic", "used", "to", "generalize", "from", "a", "limited", "set", "of", "training", "examples", "a", "linear", "model", "for", "example", "has", "a", "bias", "that", "the", "relationship", "is", "linear"],
+            "text": "Inductive Bias is the set of **assumptions** a learning algorithm uses to generalize from a limited set of training examples to make predictions on new, unseen data. It is the necessary, non-data-driven logic inherent in the model choice (e.g., assuming a linear relationship)."
+        }
+    },
+    {
+        "question": "What is the difference between shallow and deep learning?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["shallow learning", "deep learning", "neural network depth", "feature engineering", "representation learning"],
+            "tokens": ["shallow", "learning", "typically", "refers", "to", "models", "with", "only", "one", "or", "a", "few", "layers", "such", "as", "support", "vector", "machines", "or", "k", "means", "deep", "learning", "refers", "to", "neural", "networks", "with", "multiple", "hidden", "layers", "enabling", "the", "model", "to", "automatically", "learn", "complex", "features", "representation", "learning"],
+            "text": "Shallow learning refers to traditional ML models (like SVM, K-Means) with one or few layers. Deep learning uses neural networks with **multiple hidden layers**, enabling them to automatically learn complex features (**representation learning**)."
+        }
+    },
+    {
+        "question": "Name three common types of Neural Networks and their primary use.",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["CNN", "RNN", "Transformer", "Image Data", "Sequential Data", "NLP"],
+            "tokens": ["three", "common", "types", "are", "convolutional", "neural", "networks", "cnn", "primarily", "for", "image", "data", "and", "computer", "vision", "tasks", "recurrent", "neural", "networks", "rnn", "for", "sequential", "data", "like", "time", "series", "and", "natural", "language", "processing", "nlp", "and", "transformer", "networks", "which", "are", "dominant", "in", "modern", "nlp"],
+            "text": "**Convolutional Neural Networks (CNN)** for image and spatial data. **Recurrent Neural Networks (RNN)** for sequential data (time series, text). **Transformer Networks** for state-of-the-art Natural Language Processing (NLP)."
+        }
+    },
+    {
+        "question": "What is the role of a Convolutional Layer in a CNN?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["Convolutional Layer", "CNN", "filters", "feature extraction", "local patterns", "feature map"],
+            "tokens": ["the", "convolutional", "layer", "applies", "a", "learnable", "filter", "or", "kernel", "to", "the", "input", "data", "image", "to", "produce", "a", "feature", "map", "its", "role", "is", "to", "automatically", "extract", "local", "features", "such", "as", "edges", "textures", "or", "other", "patterns", "from", "the", "input"],
+            "text": "The Convolutional Layer applies a learnable **filter (kernel)** to the input data to produce a **feature map**. Its primary role is to automatically extract local features (like edges and textures) from the input data."
+        }
+    },
+    {
+        "question": "Explain the significance of the Softmax function.",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["Softmax", "multi-class classification", "probability distribution", "output layer", "sum to one"],
+            "tokens": ["the", "softmax", "function", "is", "typically", "used", "in", "the", "output", "layer", "of", "a", "neural", "network", "for", "multi", "class", "classification", "it", "takes", "a", "vector", "of", "arbitrary", "real", "numbers", "and", "converts", "it", "into", "a", "probability", "distribution", "where", "the", "values", "are", "between", "0", "and", "1", "and", "sum", "to", "1"],
+            "text": "The Softmax function is used in the output layer of neural networks for **multi-class classification**. It converts a vector of raw scores into a **probability distribution**, where each value is between 0 and 1, and the values sum up to 1."
+        }
+    },
+    {
+        "question": "What is the purpose of a Validation Set?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["validation set", "training", "model selection", "hyperparameter tuning", "generalization"],
+            "tokens": ["the", "validation", "set", "is", "a", "portion", "of", "the", "original", "dataset", "used", "to", "evaluate", "a", "model", "during", "the", "training", "process", "it", "is", "used", "to", "tune", "model", "hyperparameters", "and", "make", "decisions", "about", "model", "selection", "or", "early", "stopping", "without", "touching", "the", "final", "test", "set"],
+            "text": "The Validation Set is a portion of the dataset used to evaluate a model **during** the training process. It's used for hyperparameter tuning and model selection without touching the final, unbiased test set."
+        }
+    },
+    {
+        "question": "Differentiate between Generative and Discriminative models.",
+        "level": "hard",
+        "answer": {
+            "keywords": ["generative model", "discriminative model", "data distribution", "class boundaries", "joint probability", "conditional probability"],
+            "tokens": ["a", "generative", "model", "learns", "the", "joint", "probability", "distribution", "p", "x", "y", "between", "the", "input", "features", "x", "and", "the", "target", "y", "to", "model", "how", "the", "data", "was", "generated", "a", "discriminative", "model", "learns", "the", "conditional", "probability", "p", "y", "x", "to", "draw", "boundaries", "between", "classes", "and", "only", "focuses", "on", "classification", "not", "data", "generation"],
+            "text": "A **Generative Model** learns the joint probability distribution $P(X, Y)$, modeling how the data was generated (e.g., Naive Bayes). A **Discriminative Model** learns the conditional probability $P(Y|X)$, focusing only on drawing boundaries between classes (e.g., Logistic Regression, SVM)."
+        }
+    },
+    {
+        "question": "What is the primary difference between L1 (Lasso) and L2 (Ridge) Regularization?",
+        "level": "hard",
+        "answer": {
+            "keywords": ["L1 Lasso", "L2 Ridge", "regularization", "penalty term", "feature selection", "coefficient magnitude"],
+            "tokens": ["l1", "lasso", "regularization", "adds", "the", "absolute", "value", "of", "the", "magnitude", "of", "coefficients", "as", "a", "penalty", "term", "l1", "can", "force", "some", "coefficients", "to", "zero", "effectively", "performing", "feature", "selection", "l2", "ridge", "adds", "the", "square", "of", "the", "magnitude", "of", "coefficients", "as", "a", "penalty", "term", "it", "shrinks", "all", "coefficients", "but", "rarely", "makes", "them", "exactly", "zero"],
+            "text": "**L1 (Lasso)** adds the absolute value of coefficients as a penalty, which can force some coefficients to zero, effectively performing **feature selection**. **L2 (Ridge)** adds the square of the coefficients as a penalty, which shrinks all coefficients but rarely sets them to zero."
+        }
+    },
+    {
+        "question": "Explain how the Attention Mechanism works.",
+        "level": "hard",
+        "answer": {
+            "keywords": ["Attention Mechanism", "Transformer", "contextual information", "weights", "relevance score", "sequence data"],
+            "tokens": ["the", "attention", "mechanism", "allows", "a", "neural", "network", "to", "dynamically", "weigh", "the", "importance", "of", "different", "parts", "of", "the", "input", "data", "when", "processing", "a", "specific", "element", "in", "the", "output", "sequence", "it", "assigns", "relevance", "scores", "weights", "to", "different", "input", "elements", "to", "determine", "which", "ones", "are", "most", "important", "for", "the", "current", "task", "significantly", "improving", "performance", "in", "sequence", "to", "sequence", "tasks", "like", "translation"],
+            "text": "The Attention Mechanism allows a network to dynamically weigh the importance of different parts of the input data when processing a specific element in the output sequence. It assigns **relevance scores (weights)** to different input elements, allowing the model to focus on the most important contextual information."
+        }
+    },
+    {
+        "question": "What is Transfer Learning?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["transfer learning", "pre-trained model", "new task", "fine-tuning", "efficiency", "limited data"],
+            "tokens": ["transfer", "learning", "is", "a", "machine", "learning", "method", "where", "a", "model", "developed", "for", "a", "task", "is", "reused", "as", "the", "starting", "point", "for", "a", "model", "on", "a", "second", "related", "task", "this", "saves", "time", "and", "computational", "resources", "and", "is", "especially", "useful", "when", "the", "target", "task", "has", "limited", "labeled", "data", "e", "g", "using", "imagenet", "weights", "for", "a", "new", "image", "classification", "task"],
+            "text": "Transfer Learning is reusing a model developed for one task (often a large-scale, general task) as the starting point for a model on a different, but related task. This is efficient and particularly useful when the new task has limited labeled data."
+        }
+    },
+    {
+        "question": "What are the common challenges in Natural Language Processing (NLP)?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["NLP challenges", "ambiguity", "context sensitivity", "sarcasm", "synonyms", "data sparsity"],
+            "tokens": ["challenges", "in", "nlp", "include", "word", "sense", "disambiguation", "the", "same", "word", "can", "have", "multiple", "meanings", "context", "sensitivity", "understanding", "meaning", "from", "surrounding", "text", "dealing", "with", "slang", "sarcasm", "and", "idioms", "and", "the", "inherent", "complexity", "and", "sparsity", "of", "human", "language"],
+            "text": "Common NLP challenges include handling **ambiguity** (one word, multiple meanings), understanding **context sensitivity**, dealing with non-literal language (sarcasm, idioms), and the inherent complexity and **data sparsity** of human language."
+        }
+    },
+    {
+        "question": "What is the difference between supervised and self-supervised pre-training (e.g., in BERT)?",
+        "level": "hard",
+        "answer": {
+            "keywords": ["supervised pre-training", "self-supervised learning", "labeled data", "unlabeled data", "pretext task", "feature extraction"],
+            "tokens": ["supervised", "pre", "training", "requires", "large", "amounts", "of", "human", "labeled", "data", "e", "g", "imagenet", "self", "supervised", "learning", "uses", "the", "data", "itself", "to", "automatically", "generate", "labels", "via", "a", "pretext", "task", "e", "g", "masking", "words", "in", "a", "sentence", "like", "bert", "this", "allows", "models", "to", "learn", "powerful", "representations", "from", "massive", "amounts", "of", "unlabeled", "data"],
+            "text": "**Supervised pre-training** requires human-labeled data. **Self-supervised learning** (like in BERT) uses the data itself to automatically generate labels via a **pretext task** (e.g., masking words), allowing models to learn powerful representations from massive amounts of unlabeled data."
+        }
+    },
+    {
+        "question": "What is A/B Testing in the context of Machine Learning deployment?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["A/B testing", "model deployment", "experimentation", "metrics", "control group", "variant"],
+            "tokens": ["a", "b", "testing", "is", "a", "method", "of", "comparing", "two", "versions", "a", "and", "b", "of", "a", "system", "to", "determine", "which", "one", "performs", "better", "in", "ml", "deployment", "it", "means", "releasing", "a", "new", "model", "b", "to", "a", "subset", "of", "users", "while", "the", "old", "model", "a", "serves", "the", "control", "group", "to", "measure", "the", "impact", "on", "key", "business", "metrics", "before", "full", "rollout"],
+            "text": "A/B Testing is an experimental method to compare two versions of a system (A/B) to see which performs better. In ML, it means deploying a new model to a subset of users while the old model serves the control group, measuring the impact on key business metrics."
+        }
+    },
+    {
+        "question": "What is the difference between Mean Squared Error (MSE) and Mean Absolute Error (MAE)?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["MSE", "MAE", "regression metrics", "outliers", "squaring error", "absolute error"],
+            "tokens": ["mean", "squared", "error", "mse", "averages", "the", "square", "of", "the", "errors", "giving", "higher", "weight", "to", "large", "errors", "outliers", "mean", "absolute", "error", "mae", "averages", "the", "absolute", "difference", "between", "predictions", "and", "actual", "values", "treating", "all", "errors", "linearly", "mae", "is", "more", "robust", "to", "outliers"],
+            "text": "**MSE** averages the **square** of the errors, penalizing large errors (outliers) more heavily. **MAE** averages the **absolute** difference, treating all errors linearly, making it more robust to outliers."
+        }
+    },
+    {
+        "question": "Explain the concept of 'Cold Start' in Recommender Systems.",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["cold start", "recommender systems", "new user", "new item", "limited data", "bootstrap problem"],
+            "tokens": ["the", "cold", "start", "problem", "refers", "to", "the", "difficulty", "recommender", "systems", "face", "when", "making", "recommendations", "for", "new", "users", "user", "cold", "start", "who", "have", "no", "past", "interaction", "data", "or", "new", "items", "item", "cold", "start", "that", "have", "not", "been", "rated", "by", "many", "users", "it", "is", "a", "lack", "of", "initial", "data", "problem"],
+            "text": "The 'Cold Start' problem is the difficulty recommender systems face when making recommendations for **new users** (no interaction history) or **new items** (no ratings/views). It is fundamentally a problem of lacking initial data."
+        }
+    },
+    {
+        "question": "What is Data Leakage?",
+        "level": "hard",
+        "answer": {
+            "keywords": ["data leakage", "test set contamination", "overly optimistic", "model evaluation", "cross-validation"],
+            "tokens": ["data", "leakage", "occurs", "when", "information", "from", "outside", "the", "training", "data", "is", "used", "to", "create", "the", "model", "this", "can", "happen", "if", "the", "test", "set", "contaminates", "the", "training", "set", "or", "if", "a", "feature", "is", "calculated", "using", "future", "data", "in", "time", "series", "it", "leads", "to", "overly", "optimistic", "performance", "metrics"],
+            "text": "Data Leakage occurs when information from outside the training data is used to create the model. This often happens if the test set **contaminates** the training set, leading to overly optimistic and unrealistic performance metrics."
+        }
+    },
+    {
+        "question": "How does the Pooling Layer work in a CNN?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["Pooling Layer", "CNN", "down-sampling", "Max Pooling", "invariance", "spatial size reduction"],
+            "tokens": ["the", "pooling", "layer", "typically", "used", "after", "a", "convolutional", "layer", "performs", "a", "down", "sampling", "operation", "to", "reduce", "the", "spatial", "size", "and", "the", "number", "of", "parameters", "in", "the", "network", "the", "most", "common", "form", "is", "max", "pooling", "which", "takes", "the", "maximum", "value", "from", "a", "window", "it", "helps", "achieve", "some", "degree", "of", "translational", "invariance"],
+            "text": "The Pooling Layer (e.g., Max Pooling) performs a **down-sampling** operation to reduce the spatial size and the number of parameters in the network. It helps the model achieve some degree of translational **invariance** (making it robust to small shifts in the input)."
+        }
+    },
+    {
+        "question": "What is Dimensionality Reduction, and why use it?",
+        "level": "beginner",
+        "answer": {
+            "keywords": ["dimensionality reduction", "features", "memory", "computation time", "visualization", "curse of dimensionality"],
+            "tokens": ["dimensionality", "reduction", "is", "the", "process", "of", "reducing", "the", "number", "of", "random", "variables", "features", "under", "consideration", "it", "is", "used", "to", "save", "storage", "space", "speed", "up", "computation", "time", "address", "the", "curse", "of", "dimensionality", "and", "allow", "for", "data", "visualization", "in", "2d", "or", "3d", "space"],
+            "text": "Dimensionality Reduction is the process of reducing the number of features (variables) under consideration. It's used to speed up training, save memory, address the **Curse of Dimensionality**, and enable data visualization."
+        }
+    },
+    {
+        "question": "What is an Autoencoder?",
+        "level": "intermediate",
+        "answer": {
+            "keywords": ["Autoencoder", "unsupervised", "neural network", "encoder", "decoder", "bottleneck", "dimensionality reduction", "denoising"],
+            "tokens": ["an", "autoencoder", "is", "an", "unsupervised", "neural", "network", "designed", "to", "learn", "efficient", "data", "codings", "it", "consists", "of", "an", "encoder", "that", "compresses", "the", "input", "into", "a", "bottleneck", "representation", "and", "a", "decoder", "that", "reconstructs", "the", "output", "from", "that", "representation", "it", "is", "used", "for", "dimensionality", "reduction", "and", "denoising"],
+            "text": "An Autoencoder is an unsupervised neural network that learns efficient data codings. It consists of an **Encoder** that compresses the input into a **bottleneck** representation and a **Decoder** that attempts to reconstruct the original input from that representation, often used for dimensionality reduction and denoising."
+        }
+    },
+    {
+        "question": "Define the key difference between AUC-ROC and AUC-PR metrics.",
+        "level": "hard",
+        "answer": {
+            "keywords": ["AUC-ROC", "AUC-PR", "classification metrics", "imbalanced data", "False Positive Rate", "Precision-Recall"],
+            "tokens": ["auc", "roc", "area", "under", "the", "receiver", "operating", "characteristic", "curve", "plots", "true", "positive", "rate", "vs", "false", "positive", "rate", "and", "is", "less", "sensitive", "to", "imbalanced", "data", "auc", "pr", "area", "under", "the", "precision", "recall", "curve", "plots", "precision", "vs", "recall", "and", "is", "much", "more", "informative", "and", "sensitive", "to", "performance", "differences", "in", "highly", "imbalanced", "datasets", "where", "the", "positive", "class", "is", "rare"],
+            "text": "**AUC-ROC** plots True Positive Rate vs. False Positive Rate; it's less sensitive to imbalanced data. **AUC-PR** (Precision-Recall) plots Precision vs. Recall and is **much more informative and sensitive** to performance differences in **highly imbalanced datasets** where the positive class is rare."
+        }
+    }
+]

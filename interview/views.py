@@ -335,7 +335,23 @@ def reports_view(request):
 
     # Compute strengths and weaknesses from recent answers (last 10 sessions)
     from collections import defaultdict
-    kw_scores = defaultdict(list)
+    
+    # Build skill -> category mapping from resume
+    skill_to_category = {}
+    try:
+        latest_resume = Resume.objects.filter(username=request.user.username).order_by('-uploaded_at').first()
+        if latest_resume and isinstance(latest_resume.skill_categories, dict) and latest_resume.skill_categories:
+            for cat, skills_list in latest_resume.skill_categories.items():
+                if isinstance(skills_list, list):
+                    for skill in skills_list:
+                        skill_to_category[skill.lower().strip()] = cat
+    except Exception as e:
+        print(f"Error loading skill categories for reports: {e}")
+    
+    # Aggregate scores by category instead of individual keywords
+    category_scores = defaultdict(list)
+    kw_scores = defaultdict(list)  # Keep for fallback
+    
     for s in sessions[:10]:
         answers = s.answers if isinstance(s.answers, dict) else {}
         for meta in answers.values():
@@ -343,21 +359,38 @@ def reports_view(request):
                 sc = float(meta.get('score', 0))
             except Exception:
                 sc = 0.0
-            kws = meta.get('keywords', []) or ['General']
+            kws = meta.get('keywords', []) or []
             for kw in kws:
                 if isinstance(kw, str) and kw.strip():
+                    kw_clean = kw.strip().lower()
                     kw_scores[kw.strip()].append(sc)
+                    
+                    # Map to category if available
+                    if kw_clean in skill_to_category:
+                        category = skill_to_category[kw_clean]
+                        category_scores[category].append(sc)
 
     strengths = []
     weaknesses = []
-    if kw_scores:
-        # average per keyword
-        avgs = [(k, sum(v)/len(v) if v else 0.0, len(v)) for k, v in kw_scores.items()]
-        # strengths: avg >= 0.75 with at least 2 samples
+    
+    # Use categories if available, otherwise fall back to keywords
+    if category_scores:
+        # Average per category
+        avgs = [(k, sum(v)/len(v) if v else 0.0, len(v)) for k, v in category_scores.items()]
+        # Strengths: avg >= 0.75 with at least 2 samples
         strong = [(k, a) for k, a, n in avgs if a >= 0.75 and n >= 2]
         strong.sort(key=lambda x: x[1], reverse=True)
         strengths = [{'label': k, 'accuracy': round(a*100)} for k, a in strong[:3]]
-        # weaknesses: avg <= 0.5
+        # Weaknesses: avg <= 0.5
+        weak = [(k, a) for k, a, n in avgs if a <= 0.5 and n >= 1]
+        weak.sort(key=lambda x: x[1])
+        weaknesses = [{'label': k, 'accuracy': round(a*100)} for k, a in weak[:3]]
+    elif kw_scores:
+        # Fallback to keywords if no categories available
+        avgs = [(k, sum(v)/len(v) if v else 0.0, len(v)) for k, v in kw_scores.items()]
+        strong = [(k, a) for k, a, n in avgs if a >= 0.75 and n >= 2]
+        strong.sort(key=lambda x: x[1], reverse=True)
+        strengths = [{'label': k, 'accuracy': round(a*100)} for k, a in strong[:3]]
         weak = [(k, a) for k, a, n in avgs if a <= 0.5 and n >= 1]
         weak.sort(key=lambda x: x[1])
         weaknesses = [{'label': k, 'accuracy': round(a*100)} for k, a in weak[:3]]
@@ -484,6 +517,44 @@ def settings_view(request):
 @login_required(login_url='/login/')
 def feedback_view(request):
     """View for feedback page."""
+    from .models import Feedback
+    
+    if request.method == 'POST':
+        try:
+            # Get form data
+            rating = request.POST.get('rating')
+            category = request.POST.get('category', 'general')
+            message = request.POST.get('message', '').strip()
+            
+            # Validation
+            if not rating or not message:
+                messages.error(request, 'Please provide both rating and feedback message.')
+                return render(request, 'interview/feedback.html')
+            
+            # Create feedback
+            feedback = Feedback(
+                rating=int(rating),
+                category=category,
+                message=message
+            )
+            
+            # Add user info if logged in
+            if request.user.is_authenticated:
+                feedback.user = request.user
+                feedback.name = request.user.username
+                feedback.email = request.user.email
+            else:
+                feedback.name = request.POST.get('name', 'Anonymous')
+                feedback.email = request.POST.get('email', '')
+            
+            feedback.save()
+            messages.success(request, 'Thank you for your feedback! We appreciate your input.')
+            return redirect('feedback')
+            
+        except Exception as e:
+            messages.error(request, f'Error submitting feedback: {str(e)}')
+            return render(request, 'interview/feedback.html')
+    
     return render(request, 'interview/feedback.html')
 
 
@@ -694,8 +765,10 @@ def interview_question_view(request):
         if request.method == 'POST':
             answer_text = request.POST.get('answer', '')
             expected_keywords = current_q.get('keywords', [])
+            pre_tokenized = current_q.get('tokens', None)  # Use pre-tokenized if available
+            level = current_q.get('level', 'beginner')
             try:
-                score = score_single_answer(answer_text, expected_keywords)
+                score = score_single_answer(answer_text, expected_keywords, pre_tokenized=pre_tokenized, level=level)
             except Exception:
                 score = 0.0
 
@@ -713,6 +786,7 @@ def interview_question_view(request):
                 'answer': answer_text,
                 'score': round(score, 2),
                 'keywords': expected_keywords,
+                'tokens': pre_tokenized,  # Store tokens for breakdown later
                 'level': current_q.get('level','beginner')
             }
             request.session['scored_answers'] = scored_answers
@@ -814,13 +888,16 @@ def interview_question_view(request):
                 q_text = q['question_text']
                 ans_text = user_answers.get(q_text, '')
                 keywords = q.get('keywords', [])
+                pre_tokenized = q.get('tokens', None)  # Use pre-tokenized if available
+                level = q.get('level', 'beginner')
                 # Use improved composite scoring (via utils.score_single_answer)
-                score = score_single_answer(ans_text, keywords)
+                score = score_single_answer(ans_text, keywords, pre_tokenized=pre_tokenized, level=level)
                 total_score += score
                 scored_answers[q_text] = {
                     'answer': ans_text,
                     'score': round(score,2),
                     'keywords': keywords,
+                    'tokens': pre_tokenized,  # Store tokens for breakdown later
                     'level': q.get('level','beginner')
                 }
             avg_score = total_score / len(questions) if questions else 0
@@ -918,13 +995,26 @@ def results_view(request, session_id):
     total_q = len(answers)
     strong = mid = weak = 0
     total_score = 0.0
-    from collections import Counter
+    from collections import Counter, defaultdict
     kw_counter = Counter()
     weak_kw_counter = Counter()
 
+    # Build skill -> category mapping from resume
+    skill_to_category = {}
+    category_scores = defaultdict(list)
+    try:
+        from .models import Resume
+        latest_resume = Resume.objects.filter(username=request.user.username).order_by('-uploaded_at').first()
+        if latest_resume and isinstance(latest_resume.skill_categories, dict) and latest_resume.skill_categories:
+            for cat, skills_list in latest_resume.skill_categories.items():
+                if isinstance(skills_list, list):
+                    for skill in skills_list:
+                        skill_to_category[skill.lower().strip()] = cat
+    except Exception as e:
+        print(f"Error loading skill categories: {e}")
+
     # recompute composite breakdown per answer for transparency
     from .answer_evaluation import composite_breakdown
-    cov_sum = struct_sum = clar_sum = depth_sum = 0.0
 
     for q_text, meta in answers.items():
         try:
@@ -934,6 +1024,7 @@ def results_view(request, session_id):
         # compute breakdown based on saved level/keywords
         level = (meta.get('level') or 'beginner') if isinstance(meta, dict) else 'beginner'
         kws = (meta.get('keywords') or []) if isinstance(meta, dict) else []
+        tokens = (meta.get('tokens') or None) if isinstance(meta, dict) else None  # Get pre-tokenized
         ans_text = (meta.get('answer') or '') if isinstance(meta, dict) else ''
         # flag if answer just echoes the question
         try:
@@ -943,12 +1034,8 @@ def results_view(request, session_id):
             meta['echo_answer'] = bool(norm_q and norm_q == norm_a)
         except Exception:
             meta['echo_answer'] = False
-        bd = composite_breakdown(ans_text, kws, level=level)
+        bd = composite_breakdown(ans_text, kws, level=level, pre_tokenized=tokens)
         meta['breakdown'] = bd
-        cov_sum += bd['coverage']
-        struct_sum += bd['structure']
-        clar_sum += bd['clarity']
-        depth_sum += bd['depth']
 
         total_score += s
         if s >= 0.75:
@@ -957,19 +1044,41 @@ def results_view(request, session_id):
             mid += 1
         else:
             weak += 1
+        
+        # Aggregate by categories instead of individual keywords
         for kw in (kws or []):
             if kw:
                 kw_counter[kw] += 1
                 if s < 0.5:
                     weak_kw_counter[kw] += 1
+                
+                # Map keyword to category and track scores
+                kw_clean = kw.lower().strip()
+                if kw_clean in skill_to_category:
+                    category = skill_to_category[kw_clean]
+                    category_scores[category].append(s)
 
     avg_pct = round((total_score / total_q) * 100, 1) if total_q else 0
-    breakdown_overall = {
-        'coverage': round((cov_sum / total_q) * 100, 1) if total_q else 0,
-        'structure': round((struct_sum / total_q) * 100, 1) if total_q else 0,
-        'clarity': round((clar_sum / total_q) * 100, 1) if total_q else 0,
-        'depth': round((depth_sum / total_q) * 100, 1) if total_q else 0,
-    }
+    breakdown_overall = {}  # No longer calculating average coverage/depth
+
+    # Calculate category-based strengths and weaknesses
+    top_categories = []
+    weak_categories = []
+    
+    if category_scores:
+        category_averages = []
+        for cat, scores in category_scores.items():
+            avg_score = sum(scores) / len(scores) if scores else 0
+            category_averages.append((cat, avg_score, len(scores)))
+        
+        # Sort by average score
+        category_averages.sort(key=lambda x: x[1], reverse=True)
+        
+        # Top categories (score >= 0.75)
+        top_categories = [cat for cat, avg, _ in category_averages if avg >= 0.75][:5]
+        
+        # Weak categories (score < 0.5)
+        weak_categories = [cat for cat, avg, _ in category_averages if avg < 0.5][:5]
 
     analytics = {
         'total': total_q,
@@ -977,8 +1086,10 @@ def results_view(request, session_id):
         'strong': strong,
         'mid': mid,
         'weak': weak,
-        'top_keywords': [k for k, _ in kw_counter.most_common(6)],
-        'weak_keywords': [k for k, _ in weak_kw_counter.most_common(6)],
+        'top_keywords': [k for k, _ in kw_counter.most_common(6)],  # Keep for backward compatibility
+        'weak_keywords': [k for k, _ in weak_kw_counter.most_common(6)],  # Keep for backward compatibility
+        'top_categories': top_categories,
+        'weak_categories': weak_categories,
         'breakdown_overall': breakdown_overall,
     }
 

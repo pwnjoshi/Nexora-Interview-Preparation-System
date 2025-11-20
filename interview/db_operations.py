@@ -62,6 +62,7 @@ def get_questions_by_skills(skills, limit=10):
         if any(skill in k or k in skill for k in question_keywords for skill in lower_skills):
             matched_questions.append({
                 "keywords": q.keywords,
+                "tokens": q.tokens if hasattr(q, 'tokens') else [],  # Include pre-tokenized keywords
                 "question_text": q.question_text,
                 "level": q.level,
                 "answer": q.answer,

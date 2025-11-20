@@ -52,23 +52,86 @@ def _fuzzy_token_hit(user_tokens: List[str], term: str, threshold: float = 0.84)
     return False
 
 
-def _coverage_score(user_ans: str, correct_keywords: List[str]) -> float:
+def _smart_keyword_score(user_ans: str, correct_keywords: List[str], pre_tokenized: List[str] = None) -> Tuple[float, dict]:
+    """Unified smart scoring that combines keyword matching with answer quality metrics.
+    
+    Returns:
+        Tuple of (score, details_dict) where details contains breakdown info
+    """
+    if not user_ans:
+        return 0.0, {'matched': 0, 'total': 0, 'density': 0, 'quality': 0}
+    
     tokens = tokenize(user_ans)
-    if not correct_keywords:
-        return 0.0
-    wanted = [w.strip().lower() for w in correct_keywords if isinstance(w, str) and w.strip()]
+    words = re.findall(r"\w+", user_ans)
+    word_count = len(words)
+    
+    # Get expected keywords (prefer pre-tokenized)
+    if pre_tokenized and isinstance(pre_tokenized, list):
+        wanted = [t.strip().lower() for t in pre_tokenized if isinstance(t, str) and t.strip()]
+    else:
+        if not correct_keywords:
+            return 0.0, {'matched': 0, 'total': 0, 'density': 0, 'quality': 0}
+        wanted = []
+        for kw in correct_keywords:
+            if isinstance(kw, str) and kw.strip():
+                parts = [p.strip().lower() for p in re.split(r"[\s\-/]+", kw) if p.strip()]
+                wanted.extend(parts)
+        wanted = list(set(wanted))
+    
     if not wanted:
-        return 0.0
-    hits = 0
-    for kw in wanted:
-        # split phrases to main words and try fuzzy match
-        parts = [p for p in re.split(r"[\s\-/]+", kw) if p]
-        # consider keyword hit if all constituent parts are present fuzzily
-        if parts and all(_fuzzy_token_hit(tokens, p) for p in parts):
-            hits += 1
-        elif _fuzzy_token_hit(tokens, kw):
-            hits += 1
-    return hits / max(1, len(wanted))
+        return 0.0, {'matched': 0, 'total': 0, 'density': 0, 'quality': 0}
+    
+    # 1. KEYWORD MATCHING (60% weight - primary but not overwhelming)
+    # Count fuzzy matches
+    matched = sum(1 for term in wanted if _fuzzy_token_hit(tokens, term))
+    coverage_ratio = matched / len(wanted)
+    
+    # Apply bonus for high coverage to reward comprehensive answers
+    if coverage_ratio >= 0.8:  # 80%+ coverage gets a boost
+        coverage_score = min(1.0, coverage_ratio * 1.1)  # 10% bonus
+    else:
+        coverage_score = coverage_ratio
+    
+    # 2. KEYWORD DENSITY (20% weight - very lenient)
+    # Rewards ANY reasonable answer length
+    if word_count > 0:
+        density_pct = (matched / word_count) * 100
+        # Ultra-wide acceptable range: 0.5-25 keywords per 100 words
+        if 0.5 <= density_pct <= 25:
+            density_score = 1.0  # Full credit for any reasonable density
+        elif density_pct > 25:
+            # Very keyword-stuffed, minimal penalty
+            density_score = max(0.9, 1.0 - (density_pct - 25) / 200)
+        else:
+            # Very sparse (< 0.5%), still generous
+            density_score = max(0.7, density_pct / 0.6)
+    else:
+        density_score = 0.0
+    
+    # 3. TECHNICAL SUBSTANCE (20% weight - increased from 15%)
+    # Meaningful technical terms show depth - now weighted more
+    long_terms = {t for t in tokens if len(t) >= 6}
+    # More lenient: expect 4-5 technical terms instead of 6
+    substance_score = min(1.0, len(long_terms) / 5.0)
+    
+    # Combined weighted score - optimized for fairness
+    final_score = (
+        0.60 * coverage_score +       # Keywords with bonus for high coverage
+        0.20 * density_score +         # Very lenient on answer length
+        0.20 * substance_score         # Technical depth now more valued
+    )
+    
+    details = {
+        'matched': matched,
+        'total': len(wanted),
+        'density': round(density_pct if word_count > 0 else 0, 1),
+        'quality': round(substance_score * 100, 1),
+        'coverage_ratio': round(coverage_ratio, 3),
+        'density_score': round(density_score, 3),
+        'substance_score': round(substance_score, 3)
+    }
+    
+    return max(0.0, min(1.0, final_score)), details
 
 
 def _structure_features(user_ans: str) -> Tuple[float, float, float]:
@@ -119,65 +182,116 @@ def _clarity_conciseness_score(user_ans: str, level: str = 'beginner') -> float:
     return max(0.0, length_score - hedge_penalty)
 
 
-def _depth_score(user_ans: str) -> float:
-    """Approximate depth: unique long tokens and presence of metrics/numbers."""
+def _depth_score(user_ans: str, matched_keywords: int, total_keywords: int) -> float:
+    """Improved depth: considers answer substance, keyword density, and penalizes verbosity without keywords.
+    
+    Args:
+        user_ans: User's answer text
+        matched_keywords: Number of keywords found in answer
+        total_keywords: Total expected keywords
+    
+    Returns:
+        float: Depth score 0..1
+    """
+    if not user_ans or total_keywords == 0:
+        return 0.0
+    
+    # Count words and tokens
+    words = re.findall(r"\w+", user_ans)
+    word_count = len(words)
     tokens = tokenize(user_ans)
+    
+    # 1. Keyword Density Score (40%)
+    # How many keywords per 100 words? Good answers have high keyword density
+    if word_count > 0:
+        keyword_density = (matched_keywords / word_count) * 100
+        # Optimal density: 3-10 keywords per 100 words
+        if keyword_density >= 3:
+            density_score = min(1.0, keyword_density / 10.0)
+        else:
+            # Penalize very low density (long rambling without keywords)
+            density_score = keyword_density / 3.0
+    else:
+        density_score = 0.0
+    
+    # 2. Answer Substantiveness (40%)
+    # Unique technical terms (≥6 chars) show depth of knowledge
     long_terms = {t for t in tokens if len(t) >= 6}
-    depth_base = min(1.0, len(long_terms) / 12.0)  # saturate around 12 distinct long terms
-    has_numbers = 1.0 if re.search(r"\d", user_ans) else 0.0
-    return min(1.0, 0.8 * depth_base + 0.2 * has_numbers)
+    technical_score = min(1.0, len(long_terms) / 8.0)  # Expect ~8 technical terms
+    
+    # 3. Precision Bonus (20%)
+    # Reward concise answers with high keyword coverage
+    # Penalize verbose answers with low coverage
+    coverage_ratio = matched_keywords / total_keywords if total_keywords > 0 else 0
+    if word_count > 0 and coverage_ratio > 0.7:  # Good coverage
+        # Shorter, precise answers get bonus
+        if word_count < 100:
+            precision_score = 1.0
+        elif word_count < 200:
+            precision_score = 0.8
+        else:
+            precision_score = 0.6
+    elif coverage_ratio < 0.5 and word_count > 100:
+        # Long answer but few keywords = verbose rambling
+        precision_score = 0.2
+    else:
+        precision_score = 0.5
+    
+    # Weighted combination
+    depth = (0.4 * density_score) + (0.4 * technical_score) + (0.2 * precision_score)
+    return max(0.0, min(1.0, depth))
 
 
 def composite_answer_score(user_ans: str,
                            correct_keywords: List[str],
                            level: str = 'beginner',
-                           reference_answer: str = None) -> float:
-    """Composite 0..1 score combining coverage, structure, clarity, and depth."""
+                           reference_answer: str = None,
+                           pre_tokenized: List[str] = None) -> float:
+    """Unified smart scoring combining keyword matching with answer quality.
+    
+    Single algorithm that considers:
+    - Keyword coverage (60%): Are the keywords present?
+    - Keyword density (25%): Focused vs rambling?
+    - Technical depth (15%): Substantive technical terms?
+    """
     if not user_ans:
         return 0.0
-    cov = _coverage_score(user_ans, correct_keywords)
-    def_hit, ex_hit, tr_hit = _structure_features(user_ans)
-    struct = 0.5 * def_hit + 0.25 * ex_hit + 0.25 * tr_hit
-    clarity = _clarity_conciseness_score(user_ans, level)
-    depth = _depth_score(user_ans)
-    # weights (sum to 1)
-    if level == 'hard':
-        w_cov, w_struct, w_clarity, w_depth = 0.40, 0.20, 0.15, 0.25
-    elif level == 'intermediate':
-        w_cov, w_struct, w_clarity, w_depth = 0.45, 0.18, 0.17, 0.20
-    else:
-        w_cov, w_struct, w_clarity, w_depth = 0.50, 0.15, 0.20, 0.15
-    score = (w_cov * cov) + (w_struct * struct) + (w_clarity * clarity) + (w_depth * depth)
-    return max(0.0, min(1.0, score))
+    
+    score, _ = _smart_keyword_score(user_ans, correct_keywords, pre_tokenized=pre_tokenized)
+    return score
 
 
 def composite_breakdown(user_ans: str,
                         correct_keywords: List[str],
-                        level: str = 'beginner') -> dict:
-    """Return breakdown dict with coverage, structure, clarity, depth, and final score (0..1)."""
-    cov = _coverage_score(user_ans or '', correct_keywords or [])
-    def_hit, ex_hit, tr_hit = _structure_features(user_ans or '')
-    struct = 0.5 * def_hit + 0.25 * ex_hit + 0.25 * tr_hit
-    clarity = _clarity_conciseness_score(user_ans or '', level)
-    depth = _depth_score(user_ans or '')
-    if level == 'hard':
-        w_cov, w_struct, w_clarity, w_depth = 0.40, 0.20, 0.15, 0.25
-    elif level == 'intermediate':
-        w_cov, w_struct, w_clarity, w_depth = 0.45, 0.18, 0.17, 0.20
-    else:
-        w_cov, w_struct, w_clarity, w_depth = 0.50, 0.15, 0.20, 0.15
-    final = (w_cov * cov) + (w_struct * struct) + (w_clarity * clarity) + (w_depth * depth)
-    return {
-        'coverage': round(cov, 3),
-        'structure': round(struct, 3),
-        'clarity': round(clarity, 3),
-        'depth': round(depth, 3),
-        'final': round(max(0.0, min(1.0, final)), 3),
-        'structure_components': {
-            'definition': int(def_hit),
-            'example': int(ex_hit),
-            'tradeoff': int(tr_hit)
+                        level: str = 'beginner',
+                        pre_tokenized: List[str] = None) -> dict:
+    """Return breakdown dict using unified smart scoring algorithm.
+    
+    Returns single score with detailed component breakdown.
+    """
+    if not user_ans:
+        return {
+            'final': 0.0,
+            'matched_keywords': 0,
+            'total_keywords': 0,
+            'keyword_density': 0.0,
+            'quality_score': 0.0,
+            # Keep legacy fields for backward compatibility
+            'coverage': 0.0,
+            'depth': 0.0
         }
+    
+    score, details = _smart_keyword_score(user_ans, correct_keywords, pre_tokenized=pre_tokenized)
+    
+    return {
+        'final': round(score, 3),
+        'matched_keywords': details['matched'],
+        'total_keywords': details['total'],
+        'keyword_density': details['density'],
+        'quality_score': details['quality'],
+        # Keep legacy fields for backward compatibility
+        'coverage': round(details.get('coverage_ratio', 0), 3),
+        'depth': 0.0
     }
 
 

@@ -17,15 +17,41 @@
                     
                     {% if session.recommended_next_level and session.recommended_next_level != session.current_level %}
                     <div class="alert alert-success" style="margin:0; padding:12px 16px;">
-                        <i class="bi bi-arrow-up-circle"></i> Ready to advance: <strong>{{ session.current_level|title }} → {{ session.recommended_next_level|title }}</strong>
+                        <i class="bi bi-trophy-fill"></i> <strong>Excellent Performance!</strong> You're ready to advance: <strong>{{ session.current_level|title }} → {{ session.recommended_next_level|title }}</strong>
+                        <div style="font-size:12px; margin-top:6px; opacity:0.9;">Your strong grasp of {{ session.current_level }} concepts qualifies you for the next challenge level.</div>
                     </div>
                     {% elif session.evaluation_flag == 'Easier' %}
                     <div class="alert alert-warning" style="margin:0; padding:12px 16px;">
-                        <i class="bi bi-exclamation-triangle"></i> Consider revisiting fundamentals before moving up.
+                        <i class="bi bi-exclamation-triangle-fill"></i> <strong>Focus on Fundamentals</strong>
+                        <div style="font-size:12px; margin-top:6px;">
+                            {% if score_details.percentage >= 70 %}
+                            Your score is good, but review the missed concepts below to strengthen your foundation before advancing.
+                            {% elif score_details.percentage >= 60 %}
+                            Practice the weak areas identified below. Consider reviewing course materials or documentation for the key concepts you missed.
+                            {% else %}
+                            Take time to revisit core concepts. Study the key topics below, practice with similar questions, and retake when ready.
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% elif score_details.percentage >= 85 %}
+                    <div class="alert alert-success" style="margin:0; padding:12px 16px;">
+                        <i class="bi bi-check-circle-fill"></i> <strong>Outstanding Work!</strong>
+                        <div style="font-size:12px; margin-top:6px;">You've demonstrated excellent mastery of {{ session.current_level }} concepts. Keep this momentum going!</div>
+                    </div>
+                    {% elif score_details.percentage >= 75 %}
+                    <div class="alert alert-info" style="margin:0; padding:12px 16px;">
+                        <i class="bi bi-star-fill"></i> <strong>Great Job!</strong>
+                        <div style="font-size:12px; margin-top:6px;">Solid performance! Review the areas below where you can improve to reach excellence.</div>
+                    </div>
+                    {% elif score_details.percentage >= 60 %}
+                    <div class="alert alert-info" style="margin:0; padding:12px 16px;">
+                        <i class="bi bi-lightbulb-fill"></i> <strong>Good Effort!</strong>
+                        <div style="font-size:12px; margin-top:6px;">You're on the right track. Focus on the mid-scoring questions below to boost your understanding.</div>
                     </div>
                     {% else %}
-                    <div class="alert alert-info" style="margin:0; padding:12px 16px;">
-                        <i class="bi bi-lightbulb"></i> Keep practicing to strengthen consistency.
+                    <div class="alert alert-warning" style="margin:0; padding:12px 16px;">
+                        <i class="bi bi-bookmark-fill"></i> <strong>Keep Learning!</strong>
+                        <div style="font-size:12px; margin-top:6px;">Don't be discouraged! Review the concepts carefully, practice regularly, and you'll see improvement soon.</div>
                     </div>
                     {% endif %}
                 </div>
@@ -102,35 +128,27 @@
             <!-- Score Breakdown -->
             <div class="col-md-6">
                 <div class="card" style="padding:20px; height:100%;">
-                    <h4 style="font-size:18px; font-weight:600; margin:0 0 16px 0;">Score Breakdown</h4>
+                    <h4 style="font-size:18px; font-weight:600; margin:0 0 16px 0;">Smart Scoring</h4>
+                    <p style="font-size:13px; color:#6b7280; margin-bottom:20px;">
+                        Optimized algorithm rewarding comprehensive answers with coverage bonuses and lenient scoring.
+                    </p>
                     {% with bd=analytics.breakdown_overall %}
-                    <div style="margin-bottom:12px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                            <span style="font-size:13px;">Coverage</span>
-                            <span style="font-size:13px; font-weight:600;">{{ bd.coverage|default:0 }}%</span>
+                    <div style="background:#f9fafb; padding:16px; border-radius:8px; margin-bottom:12px;">
+                        <div style="font-size:24px; font-weight:700; color:#6366f1; text-align:center;">
+                            {{ analytics.avg_pct|default:0 }}%
                         </div>
-                        <div class="progress" style="height:8px;"><div class="progress-bar" style="width: {{ bd.coverage|default:0 }}%; background:#6366f1;"></div></div>
+                        <div style="font-size:12px; color:#6b7280; text-align:center;">Overall Score</div>
                     </div>
-                    <div style="margin-bottom:12px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                            <span style="font-size:13px;">Structure</span>
-                            <span style="font-size:13px; font-weight:600;">{{ bd.structure|default:0 }}%</span>
+                    <div style="font-size:12px; color:#6b7280;">
+                        <div style="margin-bottom:6px;">
+                            <strong>Keyword Coverage (60%):</strong> Keywords + 10% bonus for 80%+ coverage
                         </div>
-                        <div class="progress" style="height:8px;"><div class="progress-bar" style="width: {{ bd.structure|default:0 }}%; background:#8b5cf6;"></div></div>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                            <span style="font-size:13px;">Clarity</span>
-                            <span style="font-size:13px; font-weight:600;">{{ bd.clarity|default:0 }}%</span>
+                        <div style="margin-bottom:6px;">
+                            <strong>Technical Quality (20%):</strong> Depth and substantive terminology
                         </div>
-                        <div class="progress" style="height:8px;"><div class="progress-bar" style="width: {{ bd.clarity|default:0 }}%; background:#06b6d4;"></div></div>
-                    </div>
-                    <div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                            <span style="font-size:13px;">Depth</span>
-                            <span style="font-size:13px; font-weight:600;">{{ bd.depth|default:0 }}%</span>
+                        <div>
+                            <strong>Answer Detail (20%):</strong> Flexible length acceptance
                         </div>
-                        <div class="progress" style="height:8px;"><div class="progress-bar" style="width: {{ bd.depth|default:0 }}%; background:#10b981;"></div></div>
                     </div>
                     {% endwith %}
                 </div>
@@ -171,10 +189,10 @@
                         <div style="font-size:13px; font-weight:600; margin-bottom:8px; color:#15803d;">
                             <i class="bi bi-check-circle"></i> Strengths
                         </div>
-                        {% if analytics.top_keywords %}
+                        {% if analytics.top_categories %}
                             <div>
-                                {% for kw in analytics.top_keywords %}
-                                    <span class="badge" style="background:#22c55e; margin-right:6px; margin-bottom:6px;">{{ kw }}</span>
+                                {% for category in analytics.top_categories %}
+                                    <span class="badge" style="background:#22c55e; margin-right:6px; margin-bottom:6px;">{{ category }}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
@@ -187,10 +205,10 @@
                         <div style="font-size:13px; font-weight:600; margin-bottom:8px; color:#b91c1c;">
                             <i class="bi bi-exclamation-circle"></i> Focus Areas
                         </div>
-                        {% if analytics.weak_keywords %}
+                        {% if analytics.weak_categories %}
                             <div>
-                                {% for kw in analytics.weak_keywords %}
-                                    <span class="badge" style="background:#ef4444; margin-right:6px; margin-bottom:6px;">{{ kw }}</span>
+                                {% for category in analytics.weak_categories %}
+                                    <span class="badge" style="background:#ef4444; margin-right:6px; margin-bottom:6px;">{{ category }}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
@@ -248,48 +266,7 @@
                             </div>
                         </div>
 
-                        {% if answer_data.breakdown %}
-                        <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border-color);">
-                            <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">SCORE BREAKDOWN</div>
-                            {% with bd=answer_data.breakdown %}
-                            <div class="row g-2">
-                                <div class="col-6 col-md-3">
-                                    <div style="text-align:center; padding:8px; background:#fff; border-radius:6px;">
-                                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">COVERAGE</div>
-                                        {% widthratio bd.coverage 1 100 as covp %}
-                                        <div class="progress" style="height:6px; margin:4px 0;"><div class="progress-bar" style="width: {{ covp }}%; background:#6366f1;"></div></div>
-                                        <div style="font-size:13px; font-weight:600;">{{ covp }}%</div>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div style="text-align:center; padding:8px; background:#fff; border-radius:6px;">
-                                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">STRUCTURE</div>
-                                        {% widthratio bd.structure 1 100 as stp %}
-                                        <div class="progress" style="height:6px; margin:4px 0;"><div class="progress-bar" style="width: {{ stp }}%; background:#8b5cf6;"></div></div>
-                                        <div style="font-size:13px; font-weight:600;">{{ stp }}%</div>
-                                        <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">D{{ bd.structure_components.definition }} E{{ bd.structure_components.example }} T{{ bd.structure_components.tradeoff }}</div>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div style="text-align:center; padding:8px; background:#fff; border-radius:6px;">
-                                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">CLARITY</div>
-                                        {% widthratio bd.clarity 1 100 as clp %}
-                                        <div class="progress" style="height:6px; margin:4px 0;"><div class="progress-bar" style="width: {{ clp }}%; background:#06b6d4;"></div></div>
-                                        <div style="font-size:13px; font-weight:600;">{{ clp }}%</div>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div style="text-align:center; padding:8px; background:#fff; border-radius:6px;">
-                                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">DEPTH</div>
-                                        {% widthratio bd.depth 1 100 as dep %}
-                                        <div class="progress" style="height:6px; margin:4px 0;"><div class="progress-bar" style="width: {{ dep }}%; background:#10b981;"></div></div>
-                                        <div style="font-size:13px; font-weight:600;">{{ dep }}%</div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endwith %}
-                        </div>
-                        {% endif %}
+
 
                         {% if answer_data.keywords %}
                         <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border-color);">

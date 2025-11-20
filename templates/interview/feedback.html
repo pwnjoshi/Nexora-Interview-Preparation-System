@@ -15,10 +15,130 @@
                 <p style="color: var(--text-muted); margin: 0;">Help us improve Nexora by sharing your experience</p>
             </div>
             
-            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px; text-align: center;">
-                Form add karenge yaha pe 
-            </p>
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" action="{% url 'feedback' %}">
+                {% csrf_token %}
+                
+                <!-- Name (for non-authenticated users) -->
+                {% if not user.is_authenticated %}
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; font-size: 14px;">
+                        Your Name <span style="color: var(--text-muted); font-weight: 400;">(optional)</span>
+                    </label>
+                    <input type="text" class="form-control" name="name" placeholder="Enter your name">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; font-size: 14px;">
+                        Email <span style="color: var(--text-muted); font-weight: 400;">(optional)</span>
+                    </label>
+                    <input type="email" class="form-control" name="email" placeholder="your.email@example.com">
+                </div>
+                {% endif %}
+
+                <!-- Rating -->
+                <div class="mb-4">
+                    <label class="form-label" style="font-weight: 600; font-size: 14px;">
+                        Overall Rating <span style="color: #ef4444;">*</span>
+                    </label>
+                    <div class="d-flex gap-2 mt-2" id="ratingStars" style="font-size: 32px;">
+                        <i class="bi bi-star rating-star" data-rating="1" style="cursor: pointer; color: #d1d5db;"></i>
+                        <i class="bi bi-star rating-star" data-rating="2" style="cursor: pointer; color: #d1d5db;"></i>
+                        <i class="bi bi-star rating-star" data-rating="3" style="cursor: pointer; color: #d1d5db;"></i>
+                        <i class="bi bi-star rating-star" data-rating="4" style="cursor: pointer; color: #d1d5db;"></i>
+                        <i class="bi bi-star rating-star" data-rating="5" style="cursor: pointer; color: #d1d5db;"></i>
+                    </div>
+                    <input type="hidden" name="rating" id="ratingValue" required>
+                    <small class="form-text text-muted">Click to rate your experience</small>
+                </div>
+
+                <!-- Category -->
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; font-size: 14px;">Feedback Category</label>
+                    <select class="form-select" name="category">
+                        <option value="general">General Feedback</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="improvement">Suggestion for Improvement</option>
+                        <option value="bug">Bug Report</option>
+                    </select>
+                </div>
+
+                <!-- Message -->
+                <div class="mb-4">
+                    <label class="form-label" style="font-weight: 600; font-size: 14px;">
+                        Your Feedback <span style="color: #ef4444;">*</span>
+                    </label>
+                    <textarea class="form-control" name="message" rows="5" required 
+                              placeholder="Share your thoughts, suggestions, or report issues..."
+                              style="resize: vertical;"></textarea>
+                    <small class="form-text text-muted">Minimum 10 characters</small>
+                </div>
+
+                <!-- Submit -->
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'interview_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Submit Feedback
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<script>
+// Star Rating System
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.rating-star');
+    const ratingInput = document.getElementById('ratingValue');
+    let selectedRating = 0;
+
+    stars.forEach(star => {
+        // Hover effect
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.dataset.rating);
+            highlightStars(rating);
+        });
+
+        // Click to select
+        star.addEventListener('click', function() {
+            selectedRating = parseInt(this.dataset.rating);
+            ratingInput.value = selectedRating;
+            highlightStars(selectedRating, true);
+        });
+    });
+
+    // Reset on mouse leave
+    document.getElementById('ratingStars').addEventListener('mouseleave', function() {
+        if (selectedRating > 0) {
+            highlightStars(selectedRating, true);
+        } else {
+            highlightStars(0);
+        }
+    });
+
+    function highlightStars(rating, permanent = false) {
+        stars.forEach(star => {
+            const starRating = parseInt(star.dataset.rating);
+            if (starRating <= rating) {
+                star.classList.remove('bi-star');
+                star.classList.add('bi-star-fill');
+                star.style.color = '#f59e0b';
+            } else {
+                star.classList.remove('bi-star-fill');
+                star.classList.add('bi-star');
+                star.style.color = '#d1d5db';
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

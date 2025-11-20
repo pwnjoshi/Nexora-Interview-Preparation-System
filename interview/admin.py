@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Resume, Question, InterviewSession, Profile
+from .models import Resume, Question, InterviewSession, Profile, Feedback
 
 admin.site.site_title = "Nexora Admin Portal"
 admin.site.site_header = "Nexora Admin Portal"
@@ -47,3 +47,31 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ('name', 'email', 'unique_user_id')
     list_filter = ('created_at',)
     readonly_fields = ('unique_user_id', 'created_at')
+
+
+@admin.register(Feedback)
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ('get_user_name', 'rating', 'category', 'created_at', 'get_short_message')
+    search_fields = ('name', 'email', 'message', 'user__username')
+    list_filter = ('rating', 'category', 'created_at')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+    
+    def get_user_name(self, obj):
+        if obj.user:
+            return f"{obj.user.username} (Registered)"
+        return obj.name or 'Anonymous'
+    get_user_name.short_description = 'User'
+    
+    def get_short_message(self, obj):
+        return obj.message[:50] + '...' if len(obj.message) > 50 else obj.message
+    get_short_message.short_description = 'Message'
+    
+    fieldsets = (
+        ('User Information', {
+            'fields': ('user', 'name', 'email')
+        }),
+        ('Feedback Details', {
+            'fields': ('rating', 'category', 'message', 'created_at')
+        }),
+    )

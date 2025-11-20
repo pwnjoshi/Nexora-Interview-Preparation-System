@@ -47,6 +47,7 @@ def get_fixed_interview_questions(skills, counts=None, total=None):
         all_questions = [
             {
                 "keywords": q.keywords if q.keywords else [],
+                "tokens": q.tokens if hasattr(q, 'tokens') else [],
                 "question_text": q.question_text,
                 "level": q.level,
                 "answer": q.answer,
@@ -78,19 +79,21 @@ def get_fixed_interview_questions(skills, counts=None, total=None):
 # ANSWER SCORING FOR EACH QUESTION
 # ============================================================
 
-def score_single_answer(answer_text, expected_keywords):
+def score_single_answer(answer_text, expected_keywords, pre_tokenized=None, level='beginner'):
     """
     Score a single answer based on keyword matching.
 
     Args:
         answer_text: User's answer text
-        expected_keywords: List of expected keywords
+        expected_keywords: List of expected keywords (raw)
+        pre_tokenized: List of pre-tokenized keywords (optional, preferred)
+        level: Question difficulty level
 
     Returns:
         float: score between 0 and 1
     """
-    # Use composite scoring instead of plain keyword matching
-    return composite_answer_score(answer_text, expected_keywords)
+    # Use composite scoring with pre-tokenized keywords if available
+    return composite_answer_score(answer_text, expected_keywords, level=level, pre_tokenized=pre_tokenized)
 
 
 # ============================================================
@@ -161,6 +164,7 @@ def _build_question_pool(skills):
         pool = [
             {
                 "keywords": q.keywords if q.keywords else [],
+                "tokens": q.tokens if hasattr(q, 'tokens') else [],
                 "question_text": q.question_text,
                 "level": q.level,
                 "answer": q.answer,
